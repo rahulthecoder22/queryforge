@@ -14,18 +14,23 @@ export const WIKI_CORE: WikiArticle[] = [
     category: 'Visual guides',
     tags: ['animation', 'join', 'inner'],
     title: 'Reading the INNER JOIN animation',
-    summary: 'Step-by-step: how two tables become one result set when keys match.',
+    summary:
+      'The Visual lab animates how two tables become one result set when join keys match. Use this page alongside the INNER JOIN wiki article and Masterclass labs that link here.',
     seeAlso: ['sql-joins-deep', 'sql-join-algorithms'],
     sections: [
       s(
         'what-you-see',
         'What the diagram shows',
-        `Two stacks of rows represent two tables (for example customers and orders). Each row has a key column (customer id and cust_id). Lines connect rows where those keys are equal. Rows on the right that point to a missing id on the left never get a line — they are dropped from an INNER JOIN.`,
+        `Two stacks of rows represent two tables (for example customers and orders). Each row exposes a join key (customer id on the left, customer_id on the right). Animated edges connect rows where those keys are equal.
+
+Rows on the right whose foreign key points to a missing left id have no edge—they disappear from an INNER JOIN result. Rows on the left with no matching right row also disappear (that behavior is LEFT JOIN territory).`,
       ),
       s(
         'sql-shape',
-        'The SQL pattern',
-        `You write FROM left_table alias_l JOIN right_table alias_r ON alias_l.id = alias_r.foreign_key. The database engine compares every pair of rows (conceptually) and keeps pairs where the ON predicate is true. In practice it uses indexes and hash/nested loops — but mentally, it is "match keys".`,
+        'Mapping to SQL',
+        `FROM left_table AS L JOIN right_table AS R ON L.id = R.fk expresses the same pairing. The engine may implement this as nested loops, hash join, or merge join, but the logical outcome is “all pairs where ON is TRUE.”
+
+Cartesian product happens when you omit ON for INNER JOIN (invalid in strict SQL) or use comma joins without WHERE—every left row pairs with every right row.`,
         `SELECT c.name, o.item
 FROM customers c
 JOIN orders o ON c.id = o.cust_id;`,
@@ -33,7 +38,13 @@ JOIN orders o ON c.id = o.cust_id;`,
       s(
         'mistakes',
         'Common mistakes',
-        `Cartesian product: JOIN without ON (or invalid ON) can explode row counts. Wrong join type: using INNER when you need LEFT to keep customers with zero orders. Ambiguous columns: always qualify id if both tables have id.`,
+        `• Wrong join type: INNER when you need LEFT to preserve parents without children.
+
+• Fat-fingered keys: joining order.customer_id to product.id.
+
+• Duplicate keys on one side: one left row matches many right rows—fan-out duplicates unless you aggregate or dedupe.
+
+• Ambiguous SELECT * when both tables have id—always alias columns in production queries.`,
       ),
     ],
   },
@@ -42,23 +53,28 @@ JOIN orders o ON c.id = o.cust_id;`,
     category: 'Visual guides',
     tags: ['animation', 'filter', 'where'],
     title: 'Reading the WHERE animation',
-    summary: 'Why some rows fade: three-valued logic and predicate evaluation.',
+    summary:
+      'WHERE filters row-by-row after FROM/JOIN. This companion page emphasizes three-valued logic and debugging habits.',
     seeAlso: ['sql-where-deep', 'sql-null-three-valued'],
     sections: [
       s(
         'flow',
         'Row-by-row evaluation',
-        `Conceptually, after FROM (and JOIN), each row is tested against the WHERE predicate. If the result is TRUE, the row proceeds to SELECT/GROUP BY. If FALSE or UNKNOWN, the row disappears from the result.`,
+        `After the join produces a working row, the WHERE predicate is evaluated. TRUE keeps the row; FALSE or UNKNOWN discards it. UNKNOWN arises when NULL appears in comparisons—treated like FALSE for filtering, which surprises newcomers expecting NULL = NULL to match.`,
       ),
       s(
         'and-or',
-        'AND / OR',
-        `AND requires every conjunct to be TRUE. OR requires at least one disjunct TRUE. Mix them with parentheses: WHERE (a OR b) AND c is not the same as WHERE a OR (b AND c).`,
+        'AND / OR and parentheses',
+        `AND requires all conjuncts TRUE. OR requires at least one TRUE. Mixing them without parentheses leads to precedence bugs: OR binds looser than AND in SQL.
+
+Short-circuit evaluation is not guaranteed in SQL—do not rely on AND a AND (1/0) to guard division; use CASE or NULLIF instead.`,
       ),
       s(
         'practice',
         'Practice habit',
-        `Run SELECT * … WHERE … LIMIT 20 often while authoring. When counts surprise you, strip predicates one at a time to see which filter removed the rows.`,
+        `Develop queries incrementally: SELECT * … WHERE TRUE, add one predicate at a time, LIMIT early. When counts drop unexpectedly, bisect predicates and print intermediate counts with CTEs.
+
+Cross-check with LEFT JOIN to see which rows fail a filter.`,
       ),
     ],
   },
@@ -67,18 +83,28 @@ JOIN orders o ON c.id = o.cust_id;`,
     category: 'Visual guides',
     tags: ['animation', 'aggregation', 'match'],
     title: 'Reading the $match animation',
-    summary: 'How a pipeline stage shrinks the document stream — same idea as WHERE.',
+    summary:
+      '$match is the aggregation pipeline’s filter—same boolean spirit as SQL WHERE and find(). Early $match reduces work for later stages.',
     seeAlso: ['mongo-find-overview', 'mongo-aggregation-intro'],
     sections: [
       s(
         'pipeline',
-        'Pipelines process in order',
-        `$match is an aggregation stage. Documents flow stage to stage. $match early reduces work for later stages — just like selective WHERE before heavy JOINs in SQL.`,
+        'Ordered stages',
+        `Documents enter stage 1, exit transformed, enter stage 2, etc. $match passes through documents satisfying the filter; others drop. Placing $match immediately after $lookup on huge collections is usually wrong—narrow first if possible.
+
+Explain plans in Atlas show index usage per stage.`,
       ),
       s(
         'equiv',
         'Equivalence to find()',
-        `Many filters you write in the Mongo course as JSON are the same shape you would pass to find({ ... }). QueryForge runs them locally against sample arrays without a server.`,
+        `Many filter documents in the Mongo course match what you would pass to db.col.find({ … }). QueryForge evaluates filters locally; production MongoDB adds collation, read concern, and index intersection rules.
+
+$expr inside $match allows aggregation expressions referencing $$ROOT fields—different from simple field comparisons.`,
+      ),
+      s(
+        'perf',
+        'Performance intuition',
+        `Selective equality on leading index fields first. $regex without anchor scans many documents. $where (JavaScript) disables index use—avoid in production.`,
       ),
     ],
   },
@@ -87,17 +113,28 @@ JOIN orders o ON c.id = o.cust_id;`,
     category: 'Concepts',
     tags: ['meta', 'study'],
     title: 'How to use this wiki with the courses',
-    summary: 'Study path: theory column → wiki deep dive → challenge → workspace.',
+    summary:
+      'Suggested study loops: theory → wiki → challenge → workspace. Articles are written for depth; use search and category chips to narrow.',
     sections: [
       s(
         'path',
         'Recommended order',
-        `1) Open a lesson and read the Theory panel end-to-end. 2) Open the matching wiki article (links appear in Masterclass Visual lab and in See also). 3) Attempt the challenge without hints. 4) Use Workspace or masterclass datasets for repetition at scale.`,
+        `1) Read the lesson Theory panel for vocabulary and the specific task.
+
+2) Open the linked wiki article (from Masterclass Visual lab, See also links, or search) for full conceptual context and edge cases.
+
+3) Attempt the challenge cold, then use hints in tiers.
+
+4) Reproduce patterns in Workspace or masterclass datasets at higher volume.
+
+5) For interviews, pair SQL Grind constraints with wiki pages on NULLs, joins, and GROUP BY.`,
       ),
       s(
         'depth',
-        'Depth vs breadth',
-        `Each article is written to stand alone. Operators reference pages list syntax; concept pages explain why designs exist. If a term is new, search the sidebar or use category filters.`,
+        'How topics are organized',
+        `SQL articles focus on the declarative language and portable patterns; engine-specific sections call out SQLite/QueryForge where relevant. MongoDB articles note where Atlas behavior may differ from the local course matcher.
+
+Concepts articles (ACID, isolation, MVCC) explain why databases behave the way they do under concurrency and failure—essential for senior interviews.`,
       ),
     ],
   },

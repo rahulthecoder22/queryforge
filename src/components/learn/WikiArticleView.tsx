@@ -6,10 +6,58 @@ type Props = {
   onOpenArticle: (id: string) => void;
 };
 
+/** Split wiki bodies on blank lines into paragraphs; lines starting with • or - become lists. */
+function SectionBody({ text }: { text: string }) {
+  const blocks = text.split(/\n\n+/).filter((b) => b.trim().length > 0);
+
+  return (
+    <div className="mt-3 space-y-4 text-sm leading-relaxed text-[var(--text-secondary)]">
+      {blocks.map((block, bi) => {
+        const rawLines = block.split('\n');
+        const lines = rawLines.map((l) => l.trimEnd());
+        const nonEmpty = lines.filter((l) => l.trim().length > 0);
+        const isBulletBlock =
+          nonEmpty.length > 0 &&
+          nonEmpty.every((l) => /^[•\-]\s/.test(l) || /^\d+\.\s/.test(l));
+
+        if (isBulletBlock) {
+          return (
+            <ul
+              key={bi}
+              className="list-disc space-y-2 pl-5 marker:text-[var(--accent-primary)] [li]:pl-1"
+            >
+              {nonEmpty.map((line, li) => {
+                const cleaned = line.replace(/^[•\-]\s/, '').replace(/^\d+\.\s/, '');
+                return (
+                  <li key={li} className="whitespace-pre-wrap">
+                    {cleaned}
+                  </li>
+                );
+              })}
+            </ul>
+          );
+        }
+
+        return (
+          <p key={bi} className="whitespace-pre-wrap first:mt-0">
+            {block.trim()}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 export function WikiArticleView({ article, titleById, onOpenArticle }: Props) {
   return (
     <article className="mx-auto max-w-3xl pb-16">
-      <p className="text-sm leading-relaxed text-[var(--text-secondary)]">{article.summary}</p>
+      <div className="text-sm leading-relaxed text-[var(--text-secondary)]">
+        {article.summary.split(/\n\n+/).map((p, i) => (
+          <p key={i} className={i > 0 ? 'mt-3' : undefined}>
+            {p.trim()}
+          </p>
+        ))}
+      </div>
 
       {article.sections.length > 1 ? (
         <nav
@@ -33,7 +81,7 @@ export function WikiArticleView({ article, titleById, onOpenArticle }: Props) {
         {article.sections.map((sec) => (
           <section key={sec.id} id={`sec-${article.id}-${sec.id}`} className="scroll-mt-24">
             <h3 className="text-lg font-semibold text-[var(--text-primary)]">{sec.heading}</h3>
-            <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-[var(--text-secondary)]">{sec.body}</p>
+            <SectionBody text={sec.body} />
             {sec.code ? (
               <pre className="mt-4 overflow-x-auto rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-editor)] p-4 font-mono text-xs leading-relaxed text-[var(--accent-success)]">
                 {sec.code.trim()}
