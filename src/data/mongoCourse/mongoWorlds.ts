@@ -1,3 +1,4 @@
+import { withScratchMongoStarters } from '@/data/courses/scratchChallenges';
 import { buildMongoWorld } from './mongoWorldFactory';
 import { mongoWorld04, mongoWorld05, mongoWorld06 } from './mongoWorldsExtra';
 
@@ -338,7 +339,7 @@ export const mongoWorlds = [
   mongoWorld04,
   mongoWorld05,
   mongoWorld06,
-];
+].map(withScratchMongoStarters);
 
 export function getMongoLevel(
   levelId: string,

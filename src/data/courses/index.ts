@@ -15,6 +15,7 @@ import {
 import { world13 } from './worlds/world13';
 import { world14 } from './worlds/world14';
 import { world31WindowLab } from './worlds/world31WindowLab';
+import { withScratchSqlStarters } from './scratchChallenges';
 import { worldsUniformIndustries } from './worlds/worldsUniformIndustries';
 
 export const worlds: World[] = [
@@ -34,7 +35,7 @@ export const worlds: World[] = [
   world14,
   world31WindowLab,
   ...worldsUniformIndustries,
-];
+].map(withScratchSqlStarters);
 
 export function getWorld(id: number): World | undefined {
   return worlds.find((w) => w.id === id);

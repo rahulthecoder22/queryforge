@@ -5,6 +5,7 @@ import { ResultsTable } from '@/components/editor/ResultsTable';
 import { SchemaExplorer } from '@/components/editor/SchemaExplorer';
 import { getBundledSampleSql } from '@/data/databases/loadSampleSql';
 import { getLevel, getNextLevelId } from '@/data/courses';
+import { SCRATCH_SQL_STARTER } from '@/data/courses/scratchChallenges';
 import { resolveSqlTheory } from '@/data/courses/sqlTheoryResolver';
 import {
   getBrowserSqlSession,
@@ -39,7 +40,7 @@ function ChallengeSession({ levelId }: { levelId: string }) {
   const levelsCompleted = useCourseStore((s) => s.levelsCompleted);
 
   const [dbPath, setDbPath] = useState<string | null>(null);
-  const [sql, setSql] = useState(() => found?.level.starterCode ?? '-- Write your query\n');
+  const [sql, setSql] = useState(() => found?.level.starterCode ?? SCRATCH_SQL_STARTER);
   const [userResult, setUserResult] = useState<QueryResult | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [hintTier, setHintTier] = useState(0);
@@ -103,7 +104,7 @@ function ChallengeSession({ levelId }: { levelId: string }) {
 
   useEffect(() => {
     if (!found) return;
-    setSql(found.level.starterCode ?? '-- Write your query\n');
+    setSql(found.level.starterCode ?? SCRATCH_SQL_STARTER);
   }, [levelId, found?.level.id, found?.level.starterCode]);
 
   const run = useCallback(async () => {

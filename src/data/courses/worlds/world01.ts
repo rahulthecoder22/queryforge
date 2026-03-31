@@ -35,7 +35,7 @@ export const world01: World = {
           'occupation_id',
         ],
       },
-      hints: solutionHints('SELECT * FROM residents;'),
+      hints: solutionHints(),
       parTimeSeconds: 60,
       xpReward: 50,
       relevantTables: ['residents'],
@@ -56,7 +56,7 @@ export const world01: World = {
         orderSensitive: false,
         expectedColumns: ['first_name', 'last_name', 'age'],
       },
-      hints: solutionHints('SELECT first_name, last_name, age FROM residents;'),
+      hints: solutionHints(),
       parTimeSeconds: 90,
       xpReward: 60,
       relevantTables: ['residents'],
@@ -77,7 +77,7 @@ export const world01: World = {
         orderSensitive: false,
         expectedRowCount: 1,
       },
-      hints: solutionHints("SELECT * FROM residents WHERE first_name = 'Elena';"),
+      hints: solutionHints(),
       parTimeSeconds: 120,
       xpReward: 70,
       relevantTables: ['residents'],
@@ -98,7 +98,7 @@ export const world01: World = {
         orderSensitive: false,
         expectedRowCount: 33,
       },
-      hints: solutionHints('SELECT first_name, last_name FROM residents WHERE age >= 18;'),
+      hints: solutionHints(),
       parTimeSeconds: 120,
       xpReward: 75,
       relevantTables: ['residents'],
@@ -119,9 +119,7 @@ export const world01: World = {
         orderSensitive: false,
         expectedRowCount: 5,
       },
-      hints: solutionHints(
-        'SELECT first_name, age FROM residents WHERE age < 5 OR age > 65;',
-      ),
+      hints: solutionHints(),
       parTimeSeconds: 150,
       xpReward: 80,
       relevantTables: ['residents'],
@@ -149,7 +147,7 @@ export const world01: World = {
           'occupation_id',
         ],
       },
-      hints: solutionHints('SELECT * FROM residents ORDER BY age DESC;'),
+      hints: solutionHints(),
       parTimeSeconds: 120,
       xpReward: 85,
       relevantTables: ['residents'],
@@ -171,9 +169,7 @@ export const world01: World = {
         orderSensitive: true,
         expectedRowCount: 5,
       },
-      hints: solutionHints(
-        'SELECT first_name, last_name, age FROM residents ORDER BY age DESC LIMIT 5;',
-      ),
+      hints: solutionHints(),
       parTimeSeconds: 150,
       xpReward: 90,
       relevantTables: ['residents'],
@@ -195,9 +191,7 @@ export const world01: World = {
         orderSensitive: false,
         expectedRowCount: 4,
       },
-      hints: solutionHints(
-        "SELECT first_name, last_name FROM residents WHERE first_name LIKE 'J%';",
-      ),
+      hints: solutionHints(),
       parTimeSeconds: 150,
       xpReward: 95,
       relevantTables: ['residents'],
@@ -223,11 +217,7 @@ WHERE r.age BETWEEN 25 AND 40
         orderSensitive: false,
         expectedRowCount: 7,
       },
-      hints: solutionHints(`SELECT r.first_name, r.last_name, h.street
-FROM residents r
-JOIN houses h ON r.house_id = h.id
-WHERE r.age BETWEEN 25 AND 40
-  AND h.street IN ('Main St', 'Oak Ave');`),
+      hints: solutionHints(),
       parTimeSeconds: 240,
       xpReward: 110,
       relevantTables: ['residents', 'houses'],
@@ -254,11 +244,7 @@ ORDER BY r.age ASC;`,
         requiredClauses: ['JOIN'],
         expectedColumns: ['first_name', 'last_name', 'age', 'address'],
       },
-      hints: solutionHints(`SELECT r.first_name, r.last_name, r.age, h.address
-FROM residents r
-JOIN houses h ON r.house_id = h.id
-WHERE h.street = 'Oak Ave' AND r.age >= 18
-ORDER BY r.age ASC;`),
+      hints: solutionHints(),
       parTimeSeconds: 300,
       xpReward: 250,
       relevantTables: ['residents', 'houses'],

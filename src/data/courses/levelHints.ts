@@ -1,7 +1,6 @@
 import type { HintTier } from './types';
 
-export function solutionHints(solution: string): HintTier[] {
-  const s = solution.trim();
+export function solutionHints(): HintTier[] {
   return [
     {
       tier: 1,
@@ -34,8 +33,9 @@ export function solutionHints(solution: string): HintTier[] {
     {
       tier: 5,
       cost: 35,
-      headline: 'Reference solution',
-      content: s,
+      headline: 'Last-mile check',
+      content:
+        'Re-read every constraint (columns, aliases, ORDER BY, string quotes). Run your query and compare row count and column names to the task — the reference is not shown so you own the solution.',
     },
   ];
 }

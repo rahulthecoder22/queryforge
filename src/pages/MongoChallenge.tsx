@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { SCRATCH_MONGO_STARTER } from '@/data/courses/scratchChallenges';
 import { getMongoCollection } from '@/data/documentSamples';
 import { getMongoLevel, getNextMongoLevelId } from '@/data/mongoCourse/mongoWorlds';
 import { resolveMongoTheory } from '@/data/mongoCourse/mongoTheoryResolver';
@@ -25,7 +26,7 @@ function MongoChallengeSession({ levelId }: { levelId: string }) {
   const recordDocumentQuery = useCourseStore((s) => s.recordDocumentQuery);
   const levelsCompleted = useCourseStore((s) => s.levelsCompleted);
 
-  const [filterText, setFilterText] = useState(() => found?.level.starterFilter ?? '{}');
+  const [filterText, setFilterText] = useState(() => found?.level.starterFilter ?? SCRATCH_MONGO_STARTER);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [celebrateKey, setCelebrateKey] = useState(0);
   const [hintTier, setHintTier] = useState(0);

@@ -1,7 +1,7 @@
 import type { HintTier } from '@/data/courses/types';
 import type { MongoLevel, MongoWorld } from './types';
 
-function mongoHints(expectedFilter: string): HintTier[] {
+function mongoHints(): HintTier[] {
   return [
     {
       tier: 1,
@@ -34,8 +34,9 @@ function mongoHints(expectedFilter: string): HintTier[] {
     {
       tier: 5,
       cost: 36,
-      headline: 'Canonical filter',
-      content: expectedFilter,
+      headline: 'Last-mile check',
+      content:
+        'Re-read field names, operators, and $and / $or structure. Compare your match count to what the story implies — the canonical filter is not shown here.',
     },
   ];
 }
@@ -55,7 +56,7 @@ export function buildMongoWorld(
         id: `m${meta.id}-${n}`,
         worldId: meta.id,
         levelNumber: n,
-        hints: d.hints ?? mongoHints(d.expectedFilter),
+        hints: d.hints ?? mongoHints(),
       };
     }),
   };

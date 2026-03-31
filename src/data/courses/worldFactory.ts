@@ -29,7 +29,7 @@ export function buildWorld(
         id: `${meta.id}-${n}`,
         worldId: meta.id,
         levelNumber: n,
-        hints: d.hints ?? solutionHints(d.expectedQuery),
+        hints: d.hints ?? solutionHints(),
       };
     }),
   };
