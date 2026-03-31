@@ -14,6 +14,8 @@ import {
 } from './worlds/worlds512';
 import { world13 } from './worlds/world13';
 import { world14 } from './worlds/world14';
+import { world31WindowLab } from './worlds/world31WindowLab';
+import { worldsUniformIndustries } from './worlds/worldsUniformIndustries';
 
 export const worlds: World[] = [
   world01,
@@ -30,6 +32,8 @@ export const worlds: World[] = [
   world12,
   world13,
   world14,
+  world31WindowLab,
+  ...worldsUniformIndustries,
 ];
 
 export function getWorld(id: number): World | undefined {

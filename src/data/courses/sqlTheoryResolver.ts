@@ -184,6 +184,77 @@ export function resolveSqlTheory(level: Pick<Level, 'concept' | 'theory'>): Less
   if (c.includes('group') || c.includes('having') || c.includes('aggregate') || c.includes('count'))
     return lib.group;
 
+  if (
+    c.includes('window') ||
+    c.includes('row_number') ||
+    c.includes('partition by') ||
+    c.includes('partition') ||
+    c.includes('lag ') ||
+    c.includes('lead ') ||
+    (c.includes('rank') && (c.includes('window') || c.includes('over'))) ||
+    c.includes('ntile') ||
+    (c.includes('running') && c.includes('sum')) ||
+    c.includes('sum over') ||
+    c.includes('first_value') ||
+    (c.includes('frame') && c.includes('over'))
+  ) {
+    return guide('sql-window', {
+      title: 'Window (analytic) functions',
+      goal: 'Compute per-row metrics using a sliding frame without GROUP BY collapsing rows.',
+      steps: [
+        {
+          title: 'PARTITION vs global',
+          body: 'PARTITION BY slices the table so the window resets per key (e.g. per user). Omit it for one global ordering.',
+        },
+        {
+          title: 'Common functions',
+          body: 'ROW_NUMBER() is dense 1..N; RANK() leaves gaps after ties; FIRST_VALUE picks the opening row per frame; SUM(...) OVER (ORDER BY … ROWS UNBOUNDED PRECEDING) is a running total; LAG/LEAD read neighbors; ROWS BETWEEN builds explicit moving frames.',
+          sql: 'SELECT evt_ts,\n  SUM(amt) OVER (ORDER BY evt_ts ROWS UNBOUNDED PRECEDING) AS running\nFROM events;',
+        },
+        {
+          title: 'ORDER BY matters',
+          body: 'The window’s ORDER BY defines “previous” for LAG and the sort path for running aggregates.',
+        },
+      ],
+      checklist: ['Try one user_id or date range first to debug frames', 'Watch tie-breakers in ranked outputs'],
+    });
+  }
+
+  if (c.includes('not exists')) {
+    return guide('none', {
+      title: 'NOT EXISTS (anti-join)',
+      goal: 'Keep outer rows that have no matching inner rows.',
+      steps: [
+        {
+          title: 'Correlate the subquery',
+          body: 'The inner SELECT references the outer row (e.g. o.customer_id = c.id) so each customer is tested individually.',
+        },
+        {
+          title: 'Pattern',
+          body: 'NOT EXISTS returns true when the subquery returns zero rows — “never happened”.',
+          sql: "SELECT c.id FROM customers c\nWHERE NOT EXISTS (\n  SELECT 1 FROM orders o\n  WHERE o.customer_id = c.id AND o.status = 'paid'\n);",
+        },
+      ],
+    });
+  }
+
+  if (c.includes('double exists') || c.includes('two exists')) {
+    return guide('none', {
+      title: 'Multiple EXISTS predicates',
+      goal: 'Require two independent facts about the same entity.',
+      steps: [
+        {
+          title: 'AND two tests',
+          body: 'Each EXISTS block is its own correlated existence check. Combine with AND so both must be true.',
+        },
+        {
+          title: 'Keep correlation',
+          body: 'Both subqueries should tie back to the same outer key (e.g. c.id) so logic stays per customer.',
+        },
+      ],
+    });
+  }
+
   if (c.includes('subquery') || c.includes('cte') || c.includes('with')) {
     return guide('none', {
       title: 'Subqueries & CTEs',

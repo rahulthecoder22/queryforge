@@ -41,6 +41,28 @@ export function Dashboard() {
           syncs to the cloud when you ship a Pro tier).
         </p>
 
+        <div className="mt-5 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+            Suggested path
+          </p>
+          <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
+            Build fundamentals through Summit, then tackle the{' '}
+            <Link to="/learn/14-1" className="font-medium text-[var(--accent-primary)] hover:underline">
+              SQL Grind
+            </Link>{' '}
+            (interview-style). Next,{' '}
+            <Link to="/learn/31-1" className="font-medium text-[var(--accent-info)] hover:underline">
+              Window functions lab
+            </Link>{' '}
+            (World 31) adds FIRST_VALUE, LAG/LEAD, and moving frames — finish every level there to earn
+            the Pane breaker achievement — then open any industry world for scenario reps. The{' '}
+            <Link to="/learn/mongo" className="font-medium text-[var(--accent-primary)] hover:underline">
+              Mongo track
+            </Link>{' '}
+            runs in parallel on local JSON.
+          </p>
+        </div>
+
         <div className="mt-6 rounded-2xl border border-[var(--accent-primary)]/25 bg-gradient-to-br from-[var(--accent-primary)]/10 to-transparent p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
@@ -152,6 +174,18 @@ export function Dashboard() {
             className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-5 py-3 text-sm font-semibold text-[var(--text-primary)]"
           >
             SQL course
+          </Link>
+          <Link
+            to="/learn/14-1"
+            className="rounded-xl border border-[var(--accent-warning)]/35 bg-[var(--accent-warning)]/10 px-5 py-3 text-sm font-semibold text-[var(--text-primary)]"
+          >
+            SQL Grind (interview)
+          </Link>
+          <Link
+            to="/learn/31-1"
+            className="rounded-xl border border-[var(--accent-info)]/35 bg-[var(--accent-info)]/10 px-5 py-3 text-sm font-semibold text-[var(--text-primary)]"
+          >
+            Window functions lab
           </Link>
           <Link
             to="/learn/mongo"

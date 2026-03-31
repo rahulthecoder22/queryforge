@@ -17,6 +17,7 @@ export type TheoryVisualId =
   | 'sql-where'
   | 'sql-join'
   | 'sql-group'
+  | 'sql-window'
   | 'none';
 
 export interface LessonTheorySection {

@@ -82,3 +82,59 @@ INSERT INTO order_lines (order_id, product_id, qty, discount_pct) VALUES
   (109, 2, 2, 0),
   (110, 1, 1, 0),
   (110, 3, 1, 0);
+
+-- Extended regions, accounts, SKUs, and open pipeline (no extra paid orders on legacy ids).
+INSERT INTO regions (code, name) VALUES
+  ('AP', 'Asia-Pacific'),
+  ('LAT', 'Latin America');
+
+INSERT INTO customers (id, name, region_id, tier) VALUES
+  (9, 'Iota Systems', 4, 'starter'),
+  (10, 'Kappa Labs', 5, 'growth'),
+  (11, 'Lambda Rail', 4, 'starter'),
+  (12, 'Mu Mobile', 5, 'starter');
+
+INSERT INTO products (id, sku, category, list_price) VALUES
+  (6, 'P-TAB', 'hw', 449),
+  (7, 'P-CLOUD', 'svc', 1200),
+  (8, 'P-NET', 'hw', 59);
+
+INSERT INTO orders (id, customer_id, order_date, status) VALUES
+  (111, 9, '2025-03-01', 'open'),
+  (112, 10, '2025-03-02', 'open'),
+  (113, 11, '2025-03-03', 'open');
+
+INSERT INTO order_lines (order_id, product_id, qty, discount_pct) VALUES
+  (111, 6, 1, 0),
+  (112, 7, 1, 0),
+  (113, 8, 2, 0);
+
+-- Reference data for schema exploration (not used by Summit / Grind validators).
+CREATE TABLE warehouses (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  code TEXT NOT NULL,
+  region_id INTEGER NOT NULL REFERENCES regions(id)
+);
+
+INSERT INTO warehouses (code, region_id) VALUES
+  ('SEA-01', 4),
+  ('SEA-02', 4),
+  ('MX-01', 5),
+  ('EU-HUB', 3),
+  ('W-CV', 1);
+
+CREATE TABLE inventory_snapshot (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  warehouse_id INTEGER NOT NULL REFERENCES warehouses(id),
+  product_id INTEGER NOT NULL REFERENCES products(id),
+  on_hand INTEGER NOT NULL,
+  as_of TEXT NOT NULL
+);
+
+INSERT INTO inventory_snapshot (warehouse_id, product_id, on_hand, as_of) VALUES
+  (1, 6, 220, '2025-03-15'),
+  (1, 1, 40, '2025-03-15'),
+  (2, 7, 18, '2025-03-15'),
+  (3, 8, 900, '2025-03-15'),
+  (4, 4, 310, '2025-03-15'),
+  (5, 2, 1500, '2025-03-15');

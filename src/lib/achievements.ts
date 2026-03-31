@@ -6,6 +6,7 @@ export type AchievementId =
   | 'sql_spark'
   | 'streak_3'
   | 'world_tour'
+  | 'window_master'
   | 'document_path'
   | 'xp_scholar';
 
@@ -42,6 +43,12 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     icon: '🌍',
   },
   {
+    id: 'window_master',
+    title: 'Pane breaker',
+    description: 'Clear every level in Window & running metrics (World 31).',
+    icon: '🪟',
+  },
+  {
     id: 'document_path',
     title: 'Polyglot path',
     description: 'Run a find in the Document lab.',
@@ -72,6 +79,8 @@ export function unlockedAchievementIds(input: {
   if (stats.queryRunsTotal >= 25) u.add('sql_spark');
   if (stats.streakDays >= 3) u.add('streak_3');
   if (worlds.some((w) => worldFullyDone(w, levelsCompleted))) u.add('world_tour');
+  const w31 = worlds.find((w) => w.id === 31);
+  if (w31 && worldFullyDone(w31, levelsCompleted)) u.add('window_master');
   if (stats.documentQueriesTotal >= 1) u.add('document_path');
   if (totalXP >= 2500) u.add('xp_scholar');
   return u;

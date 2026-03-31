@@ -3,6 +3,12 @@ import { motion } from 'framer-motion';
 import { worlds } from '@/data/courses';
 import { useCourseStore } from '@/stores/courseStore';
 
+const diffClass: Record<'Easy' | 'Medium' | 'Hard', string> = {
+  Easy: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/35',
+  Medium: 'bg-amber-500/15 text-amber-800 dark:text-amber-200 border-amber-500/35',
+  Hard: 'bg-rose-500/15 text-rose-800 dark:text-rose-200 border-rose-500/35',
+};
+
 export function CourseMap() {
   const levelsCompleted = useCourseStore((s) => s.levelsCompleted);
   const totalLevels = worlds.reduce((n, w) => n + w.levels.length, 0);
@@ -12,8 +18,9 @@ export function CourseMap() {
       <h1 className="text-2xl font-bold text-[var(--text-primary)]">SQL course map</h1>
       <p className="mt-2 max-w-2xl text-sm text-[var(--text-secondary)]">
         {worlds.length} worlds, {totalLevels} levels — fundamentals through analytics, plus the SQL
-        Grind Set (LeetCode-style interview problems: anti-joins, EXISTS, CTEs, ranking). Each
-        challenge lists constraints, a solve guide, and five progressive hints. Jump anywhere;
+        Grind Set (interview SQL), then the Window lab (ROW_NUMBER, running SUM, LAG, RANK, NTILE),
+        then industry scenarios. Each challenge lists constraints, a solve guide, and five progressive
+        hints. Jump anywhere;
         progress and XP still save.
       </p>
       <p className="mt-3 text-sm">
@@ -63,10 +70,24 @@ export function CourseMap() {
                     <li key={l.id}>
                       <Link
                         to={`/learn/${l.id}`}
-                        className="flex items-center justify-between rounded-lg px-2 py-1.5 text-sm hover:bg-[var(--bg-tertiary)]"
+                        className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-[var(--bg-tertiary)]"
                       >
-                        <span className="text-[var(--text-primary)]">{l.title}</span>
-                        {done ? <span className="text-[var(--accent-success)]">✓</span> : null}
+                        <span className="min-w-0 flex-1 text-[var(--text-primary)]">{l.title}</span>
+                        <span className="flex shrink-0 items-center gap-1.5">
+                          {l.difficulty ? (
+                            <span
+                              className={`rounded border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide ${diffClass[l.difficulty]}`}
+                            >
+                              {l.difficulty}
+                            </span>
+                          ) : null}
+                          {l.isBoss ? (
+                            <span className="text-[10px] font-semibold text-[var(--accent-warning)]">
+                              Boss
+                            </span>
+                          ) : null}
+                          {done ? <span className="text-[var(--accent-success)]">✓</span> : null}
+                        </span>
                       </Link>
                     </li>
                   );

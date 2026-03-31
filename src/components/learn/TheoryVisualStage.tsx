@@ -34,6 +34,29 @@ export function TheoryVisualStage({ id, accent = 'var(--accent-primary)', compac
         {id === 'sql-where' && <VisSqlWhere accent={accent} />}
         {id === 'sql-join' && <VisSqlJoin accent={accent} />}
         {id === 'sql-group' && <VisSqlGroup accent={accent} />}
+        {id === 'sql-window' && <VisSqlWindow accent={accent} />}
+      </div>
+    </div>
+  );
+}
+
+function VisSqlWindow({ accent }: { accent: string }) {
+  return (
+    <div className="space-y-2 font-mono text-[10px] text-[var(--text-secondary)]">
+      <div className="text-center text-[var(--text-muted)]">Frame slides over ordered rows without collapsing them</div>
+      <div className="flex justify-center gap-1">
+        {[1, 2, 3, 4].map((n) => (
+          <div
+            key={n}
+            className="flex h-8 w-7 items-center justify-center rounded border border-[var(--border-subtle)]"
+            style={{ boxShadow: n === 2 ? `inset 0 -2px 0 ${accent}` : undefined }}
+          >
+            {n}
+          </div>
+        ))}
+      </div>
+      <div className="text-center" style={{ color: accent }}>
+        ROW_NUMBER · SUM() OVER · LAG / LEAD
       </div>
     </div>
   );

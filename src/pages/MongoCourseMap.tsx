@@ -1,7 +1,21 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { mongoWorlds } from '@/data/mongoCourse/mongoWorlds';
+import type { MongoLevel } from '@/data/mongoCourse/types';
 import { useCourseStore } from '@/stores/courseStore';
+
+const diffClass: Record<'Easy' | 'Medium' | 'Hard', string> = {
+  Easy: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/35',
+  Medium: 'bg-amber-500/15 text-amber-800 dark:text-amber-200 border-amber-500/35',
+  Hard: 'bg-rose-500/15 text-rose-800 dark:text-rose-200 border-rose-500/35',
+};
+
+function mongoLevelDifficulty(l: MongoLevel): 'Easy' | 'Medium' | 'Hard' {
+  if (l.difficulty) return l.difficulty;
+  if (l.isBoss) return 'Hard';
+  if (l.parTimeSeconds >= 200) return 'Medium';
+  return 'Easy';
+}
 
 export function MongoCourseMap() {
   const levelsCompleted = useCourseStore((s) => s.levelsCompleted);
@@ -16,9 +30,10 @@ export function MongoCourseMap() {
         progressive hints (canonical answer on the last tier). Jump anywhere; XP still saves.
       </p>
       <p className="mt-3 text-sm">
-        <Link to="/learn" className="text-[var(--accent-info)] hover:underline">
-          ← SQL course
-        </Link>
+        <Link to="/learn" className="font-medium text-[var(--accent-primary)] hover:underline">
+          ← SQL course map
+        </Link>{' '}
+        <span className="text-[var(--text-muted)]">(fundamentals, Grind, windows, industries)</span>
       </p>
 
       <div className="mt-8 grid gap-4 md:grid-cols-2">
@@ -29,9 +44,9 @@ export function MongoCourseMap() {
               key={w.id}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
+              transition={{ delay: i * 0.03 }}
               className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5"
-              style={{ boxShadow: `0 0 0 1px ${w.color}44` }}
+              style={{ boxShadow: `0 0 0 1px ${w.color}22` }}
             >
               <div className="flex items-start justify-between gap-2">
                 <div>
@@ -48,19 +63,33 @@ export function MongoCourseMap() {
               </div>
               <p className="mt-3 text-sm text-[var(--text-secondary)]">{w.description}</p>
               <ul className="mt-4 space-y-1">
-                {w.levels.map((l) => (
-                  <li key={l.id}>
-                    <Link
-                      to={`/learn/mongo/${l.id}`}
-                      className="flex items-center justify-between rounded-lg px-2 py-1.5 text-sm hover:bg-[var(--bg-tertiary)]"
-                    >
-                      <span className="text-[var(--text-primary)]">{l.title}</span>
-                      {levelsCompleted[l.id]?.completed ? (
-                        <span className="text-[var(--accent-success)]">✓</span>
-                      ) : null}
-                    </Link>
-                  </li>
-                ))}
+                {w.levels.map((l) => {
+                  const d = mongoLevelDifficulty(l);
+                  const complete = levelsCompleted[l.id]?.completed === true;
+                  return (
+                    <li key={l.id}>
+                      <Link
+                        to={`/learn/mongo/${l.id}`}
+                        className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-[var(--bg-tertiary)]"
+                      >
+                        <span className="min-w-0 flex-1 text-[var(--text-primary)]">{l.title}</span>
+                        <span className="flex shrink-0 items-center gap-1.5">
+                          <span
+                            className={`rounded border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide ${diffClass[d]}`}
+                          >
+                            {d}
+                          </span>
+                          {l.isBoss ? (
+                            <span className="text-[10px] font-semibold text-[var(--accent-warning)]">
+                              Boss
+                            </span>
+                          ) : null}
+                          {complete ? <span className="text-[var(--accent-success)]">✓</span> : null}
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </motion.div>
           );

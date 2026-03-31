@@ -21,6 +21,7 @@ import { ChallengeMetaPanel } from '@/components/learn/ChallengeMetaPanel';
 import { HintsSlideOver } from '@/components/learn/HintsSlideOver';
 import { LessonLearnPanel } from '@/components/learn/LessonLearnPanel';
 import { SqlResultsDialog } from '@/components/learn/SqlResultsDialog';
+import { InterviewPatternsCallout } from '@/components/learn/InterviewPatternsCallout';
 
 export function Challenge() {
   const { levelId = '' } = useParams<{ levelId: string }>();
@@ -182,6 +183,25 @@ function ChallengeSession({ levelId }: { levelId: string }) {
           <h1 className="truncate text-base font-semibold md:text-lg">
             {world.icon} {world.name} · {level.title}
           </h1>
+          <details className="mt-1 hidden md:block">
+            <summary className="cursor-pointer select-none text-[10px] text-[var(--text-muted)] hover:text-[var(--text-secondary)]">
+              Keyboard & actions
+            </summary>
+            <ul className="mt-1.5 space-y-0.5 text-[10px] leading-relaxed text-[var(--text-muted)]">
+              <li>
+                <kbd className="rounded border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-1 font-mono">
+                  ⌘
+                </kbd>{' '}
+                +{' '}
+                <kbd className="rounded border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-1 font-mono">
+                  ↵
+                </kbd>{' '}
+                Run query (when editor focused)
+              </li>
+              <li>Use Check answer to compare your result set to the reference solution.</li>
+              <li>Hints spend XP tiers — try the solve guide in the constraints panel first.</li>
+            </ul>
+          </details>
         </div>
         <div className="flex flex-wrap items-center justify-end gap-2">
           <button
@@ -281,6 +301,7 @@ function ChallengeSession({ levelId }: { levelId: string }) {
                 Tables:{' '}
                 <span className="font-mono text-[var(--text-secondary)]">{level.relevantTables.join(', ')}</span>
               </p>
+              <InterviewPatternsCallout worldId={world.id} />
             </LessonLearnPanel>
           </div>
 

@@ -120,7 +120,7 @@ ORDER BY o.id;`,
 WHERE category = 'hw'
 AND list_price > (SELECT AVG(list_price) FROM products WHERE category = 'hw')
 ORDER BY sku;`,
-      validation: { strategy: ['result_match'], orderSensitive: true, expectedRowCount: 1 },
+      validation: { strategy: ['result_match'], orderSensitive: true, expectedRowCount: 2 },
       parTimeSeconds: 240,
       xpReward: 130,
       relevantTables: ['products'],

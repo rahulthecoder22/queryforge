@@ -29,7 +29,7 @@ export const world14 = buildWorld(
       concept: 'NOT EXISTS',
       task: 'id, name for customers with no paid order; ORDER BY id.',
       starterCode:
-        "SELECT c.id, c.name\nFROM customers c\nWHERE NOT EXISTS (\n  SELECT 1 FROM orders o\n  WHERE o.customer_id = c.id AND o.status = 'paid'\n)\nORDER BY c.id;",
+        "SELECT c.id, c.name\nFROM customers c\nWHERE NOT EXISTS (\n  SELECT 1 FROM orders o\n  WHERE o.customer_id = c.id AND \n)\nORDER BY c.id;",
       expectedQuery: `SELECT c.id, c.name
 FROM customers c
 WHERE NOT EXISTS (
@@ -37,7 +37,7 @@ WHERE NOT EXISTS (
   WHERE o.customer_id = c.id AND o.status = 'paid'
 )
 ORDER BY c.id;`,
-      validation: { strategy: ['result_match'], orderSensitive: true, expectedRowCount: 3 },
+      validation: { strategy: ['result_match'], orderSensitive: true, expectedRowCount: 7 },
       parTimeSeconds: 240,
       xpReward: 120,
       relevantTables: ['customers', 'orders'],
@@ -54,7 +54,7 @@ ORDER BY c.id;`,
       concept: 'JOIN + SUM filter',
       task: 'One column open_rev = SUM(qty * list_price * (1 - discount_pct/100)) for open orders only.',
       starterCode:
-        "SELECT ROUND(SUM(ol.qty * p.list_price * (1 - ol.discount_pct / 100.0)), 2) AS open_rev\nFROM order_lines ol\nJOIN products p ON ol.product_id = p.id\nJOIN orders o ON ol.order_id = o.id\nWHERE o.status = 'open';",
+        "SELECT ROUND(SUM(ol.qty * p.list_price * (1 - ol.discount_pct / 100.0)), 2) AS open_rev\nFROM order_lines ol\nJOIN products p ON ol.product_id = p.id\nJOIN orders o ON ol.order_id = o.id\nWHERE \n;",
       expectedQuery: `SELECT ROUND(SUM(ol.qty * p.list_price * (1 - ol.discount_pct / 100.0)), 2) AS open_rev
 FROM order_lines ol
 JOIN products p ON ol.product_id = p.id
@@ -82,7 +82,7 @@ WHERE o.status = 'open';`,
       concept: 'CTE + MIN ordering',
       task: 'Return id (order id) and r (revenue) for the cheapest paid order by line math.',
       starterCode:
-        "WITH rev AS (\n  SELECT ol.order_id,\n    SUM(ol.qty * p.list_price * (1 - ol.discount_pct / 100.0)) AS r\n  FROM order_lines ol\n  JOIN products p ON ol.product_id = p.id\n  GROUP BY ol.order_id\n)\nSELECT o.id, rev.r\nFROM orders o\nJOIN rev ON o.id = rev.order_id\nWHERE o.status = 'paid'\nORDER BY rev.r ASC, o.id ASC\nLIMIT 1;",
+        "WITH rev AS (\n  SELECT ol.order_id,\n    SUM(ol.qty * p.list_price * (1 - ol.discount_pct / 100.0)) AS r\n  FROM order_lines ol\n  JOIN products p ON ol.product_id = p.id\n  GROUP BY ol.order_id\n)\nSELECT o.id, rev.r\nFROM orders o\nJOIN rev ON o.id = rev.order_id\nWHERE \nORDER BY rev.r ASC, o.id ASC\nLIMIT 1;",
       expectedQuery: `WITH rev AS (
   SELECT ol.order_id,
     SUM(ol.qty * p.list_price * (1 - ol.discount_pct / 100.0)) AS r
@@ -118,7 +118,7 @@ LIMIT 1;`,
       concept: 'GROUP BY order',
       task: 'Columns order_id, disc_amt — the top discount burn order.',
       starterCode:
-        "SELECT ol.order_id AS order_id,\n  SUM(ol.qty * p.list_price * (ol.discount_pct / 100.0)) AS disc_amt\nFROM order_lines ol\nJOIN products p ON ol.product_id = p.id\nJOIN orders o ON ol.order_id = o.id\nWHERE o.status = 'paid'\nGROUP BY ol.order_id\nORDER BY disc_amt DESC, order_id ASC\nLIMIT 1;",
+        "SELECT ol.order_id AS order_id,\n  SUM(ol.qty * p.list_price * (ol.discount_pct / 100.0)) AS disc_amt\nFROM order_lines ol\nJOIN products p ON ol.product_id = p.id\nJOIN orders o ON ol.order_id = o.id\nWHERE o.status = 'paid'\nGROUP BY ol.order_id\nORDER BY \nLIMIT 1;",
       expectedQuery: `SELECT ol.order_id AS order_id,
   SUM(ol.qty * p.list_price * (ol.discount_pct / 100.0)) AS disc_amt
 FROM order_lines ol
@@ -153,7 +153,7 @@ LIMIT 1;`,
       concept: 'double EXISTS',
       task: 'SELECT DISTINCT c.id, c.name ORDER BY c.id.',
       starterCode:
-        "SELECT DISTINCT c.id, c.name\nFROM customers c\nJOIN orders o ON o.customer_id = c.id AND o.status = 'paid'\nJOIN order_lines ol ON ol.order_id = o.id\nJOIN products p ON p.id = ol.product_id\nWHERE p.category = 'hw'\n  AND EXISTS (\n    SELECT 1 FROM orders o2\n    JOIN order_lines ol2 ON ol2.order_id = o2.id\n    JOIN products p2 ON p2.id = ol2.product_id\n    WHERE o2.customer_id = c.id AND o2.status = 'paid' AND p2.category = 'svc'\n  )\nORDER BY c.id;",
+        "SELECT DISTINCT c.id, c.name\nFROM customers c\nJOIN orders o ON o.customer_id = c.id AND o.status = 'paid'\nJOIN order_lines ol ON ol.order_id = o.id\nJOIN products p ON p.id = ol.product_id\nWHERE p.category = 'hw'\n  AND EXISTS (\n    SELECT 1 FROM orders o2\n    JOIN order_lines ol2 ON ol2.order_id = o2.id\n    JOIN products p2 ON p2.id = ol2.product_id\n    WHERE \n  )\nORDER BY c.id;",
       expectedQuery: `SELECT DISTINCT c.id, c.name
 FROM customers c
 JOIN orders o ON o.customer_id = c.id AND o.status = 'paid'
@@ -187,7 +187,7 @@ ORDER BY c.id;`,
       concept: 'CTE AVG compare',
       task: 'customer ids (column id) above average paid rev, ascending.',
       starterCode:
-        "WITH cr AS (\n  SELECT c.id,\n    SUM(ol.qty * p.list_price * (1 - ol.discount_pct / 100.0)) AS rev\n  FROM customers c\n  JOIN orders o ON o.customer_id = c.id AND o.status = 'paid'\n  JOIN order_lines ol ON ol.order_id = o.id\n  JOIN products p ON ol.product_id = p.id\n  GROUP BY c.id\n),\navg_r AS (SELECT AVG(rev) AS a FROM cr)\nSELECT cr.id\nFROM cr CROSS JOIN avg_r\nWHERE cr.rev > avg_r.a\nORDER BY cr.id;",
+        "WITH cr AS (\n  SELECT c.id,\n    SUM(ol.qty * p.list_price * (1 - ol.discount_pct / 100.0)) AS rev\n  FROM customers c\n  JOIN orders o ON o.customer_id = c.id AND o.status = 'paid'\n  JOIN order_lines ol ON ol.order_id = o.id\n  JOIN products p ON ol.product_id = p.id\n  GROUP BY c.id\n),\navg_r AS (SELECT AVG(rev) AS a FROM cr)\nSELECT cr.id\nFROM cr CROSS JOIN avg_r\nWHERE \nORDER BY cr.id;",
       expectedQuery: `WITH cr AS (
   SELECT c.id,
     SUM(ol.qty * p.list_price * (1 - ol.discount_pct / 100.0)) AS rev
@@ -219,7 +219,7 @@ ORDER BY cr.id;`,
       concept: 'JOIN + GROUP BY',
       task: 'Columns name (region), n (count).',
       starterCode:
-        "SELECT r.name, COUNT(*) AS n\nFROM customers c\nJOIN regions r ON r.id = c.region_id\nWHERE c.tier = 'enterprise'\nGROUP BY r.id\nORDER BY r.name;",
+        "SELECT r.name, COUNT(*) AS n\nFROM customers c\nJOIN regions r ON r.id = c.region_id\nWHERE \nGROUP BY r.id\nORDER BY r.name;",
       expectedQuery: `SELECT r.name, COUNT(*) AS n
 FROM customers c
 JOIN regions r ON r.id = c.region_id
@@ -232,8 +232,8 @@ ORDER BY r.name;`,
       relevantTables: ['customers', 'regions'],
     },
     {
-      title: 'Boss: silver medal SKU',
-      isBoss: true,
+      title: 'Silver medal SKU',
+      isBoss: false,
       difficulty: 'Hard',
       constraints: [
         'rank products by total qty sold',
@@ -247,7 +247,7 @@ ORDER BY r.name;`,
       concept: 'LIMIT OFFSET ranking',
       task: 'Single column product_id for rank #2 by total qty.',
       starterCode:
-        'SELECT product_id FROM (\n  SELECT product_id, SUM(qty) AS q\n  FROM order_lines\n  GROUP BY product_id\n  ORDER BY q DESC, product_id ASC\n  LIMIT 1 OFFSET 1\n);',
+        'SELECT product_id FROM (\n  SELECT product_id, SUM(qty) AS q\n  FROM order_lines\n  GROUP BY product_id\n  ORDER BY \n  LIMIT 1 OFFSET 1\n);',
       expectedQuery: `SELECT product_id FROM (
   SELECT product_id, SUM(qty) AS q
   FROM order_lines
@@ -264,6 +264,158 @@ ORDER BY r.name;`,
       parTimeSeconds: 360,
       xpReward: 320,
       relevantTables: ['order_lines'],
+    },
+    {
+      title: 'Exact paid cadence',
+      isBoss: false,
+      difficulty: 'Hard',
+      constraints: [
+        'only customers with exactly two paid orders',
+        'columns id, name',
+        'ORDER BY id',
+      ],
+      solveGuide: sg(
+        'Join customers to paid orders, collapse with GROUP BY customer, then HAVING COUNT(*) = 2. You are counting order rows, not line rows.',
+      ),
+      story: 'Lifecycle marketing tags “steady repeaters” as accounts with precisely two paid orders in the system.',
+      concept: 'GROUP BY + HAVING = N',
+      task: 'id and name for customers who have exactly two paid orders; ascending id.',
+      starterCode:
+        "SELECT c.id, c.name\nFROM customers c\nJOIN orders o ON o.customer_id = c.id\nWHERE \nGROUP BY c.id, c.name\nHAVING \nORDER BY c.id;",
+      expectedQuery: `SELECT c.id, c.name
+FROM customers c
+JOIN orders o ON o.customer_id = c.id
+WHERE o.status = 'paid'
+GROUP BY c.id, c.name
+HAVING COUNT(*) = 2
+ORDER BY c.id;`,
+      validation: { strategy: ['result_match'], orderSensitive: true, expectedRowCount: 2 },
+      parTimeSeconds: 300,
+      xpReward: 155,
+      relevantTables: ['customers', 'orders'],
+    },
+    {
+      title: 'Share-of-wallet leaders',
+      isBoss: false,
+      difficulty: 'Hard',
+      constraints: [
+        'customers tied for the highest paid-order count',
+        'return all ties',
+        'ORDER BY customer_id',
+      ],
+      solveGuide: sg(
+        'CTE or subquery: compute COUNT(*) of paid orders per customer_id, take MAX of that count, filter rows where count equals the max.',
+      ),
+      story: 'Sales ops wants every account that is tied for “most paid checkouts” — not only one winner.',
+      concept: 'CTE + MAX filter',
+      task: 'customer_id only, all customers whose paid-order count equals the global max; ORDER BY customer_id.',
+      starterCode:
+        "WITH paid_counts AS (\n  SELECT customer_id, COUNT(*) AS n\n  FROM orders\n  WHERE \n  GROUP BY customer_id\n)\nSELECT customer_id FROM paid_counts\nWHERE n = (SELECT MAX(n) FROM paid_counts)\nORDER BY customer_id;",
+      expectedQuery: `WITH paid_counts AS (
+  SELECT customer_id, COUNT(*) AS n
+  FROM orders
+  WHERE status = 'paid'
+  GROUP BY customer_id
+)
+SELECT customer_id FROM paid_counts
+WHERE n = (SELECT MAX(n) FROM paid_counts)
+ORDER BY customer_id;`,
+      validation: { strategy: ['result_match'], orderSensitive: true, expectedRowCount: 2 },
+      parTimeSeconds: 340,
+      xpReward: 165,
+      relevantTables: ['orders'],
+    },
+    {
+      title: 'Refund exposure (units)',
+      isBoss: false,
+      difficulty: 'Medium',
+      constraints: ['only refunded orders', 'SUM of line qty', 'alias refunded_units'],
+      solveGuide: sg(
+        'Join lines to orders, filter status = refunded, aggregate SUM(qty). COALESCE is optional if you want zero instead of NULL when empty.',
+      ),
+      story: 'Risk asks how many physical units were attached to orders that ultimately refunded.',
+      concept: 'JOIN + SUM + filter',
+      task: 'One row: SUM(order_lines.qty) AS refunded_units for lines whose order is refunded.',
+      starterCode:
+        "SELECT SUM(ol.qty) AS refunded_units\nFROM order_lines ol\nJOIN orders o ON o.id = ol.order_id\nWHERE \n;",
+      expectedQuery: `SELECT SUM(ol.qty) AS refunded_units
+FROM order_lines ol
+JOIN orders o ON o.id = ol.order_id
+WHERE o.status = 'refunded';`,
+      validation: {
+        strategy: ['result_match'],
+        orderSensitive: false,
+        expectedRowCount: 1,
+        expectedColumns: ['refunded_units'],
+      },
+      parTimeSeconds: 180,
+      xpReward: 105,
+      relevantTables: ['order_lines', 'orders'],
+    },
+    {
+      title: 'First paid checkout',
+      isBoss: false,
+      difficulty: 'Medium',
+      constraints: [
+        'MIN(order id) per customer among paid orders only',
+        'customers with no paid orders are omitted',
+        'ORDER BY customer_id',
+      ],
+      solveGuide: sg(
+        'Filter orders to paid first (WHERE), then GROUP BY customer_id and take MIN(id) as the first paid order surrogate.',
+      ),
+      story: 'Analytics needs each customer’s earliest paid order id for cohort labeling.',
+      concept: 'GROUP BY + MIN',
+      task: 'customer_id and first_paid_order_id (= MIN(order id)) from paid orders only; ORDER BY customer_id.',
+      starterCode:
+        "SELECT customer_id,\nFROM orders\nWHERE status = 'paid'\nGROUP BY customer_id\nORDER BY customer_id;",
+      expectedQuery: `SELECT customer_id, MIN(id) AS first_paid_order_id
+FROM orders
+WHERE status = 'paid'
+GROUP BY customer_id
+ORDER BY customer_id;`,
+      validation: {
+        strategy: ['result_match'],
+        orderSensitive: true,
+        expectedRowCount: 5,
+        expectedColumns: ['customer_id', 'first_paid_order_id'],
+      },
+      parTimeSeconds: 220,
+      xpReward: 125,
+      relevantTables: ['orders'],
+    },
+    {
+      title: 'Boss: Multi-line baskets',
+      isBoss: true,
+      difficulty: 'Hard',
+      constraints: [
+        'orders with two or more line items',
+        'columns order_id, line_items (count of lines)',
+        'ORDER BY order_id',
+      ],
+      solveGuide: sg(
+        'GROUP BY order on order_lines (or orders joined to lines). HAVING COUNT(*) >= 2. No need to filter paid/open unless the story asks.',
+      ),
+      story: 'Ops suspects split shipments when an order has multiple SKUs — list every order id with at least two lines.',
+      concept: 'GROUP BY + HAVING >=',
+      task: 'order_id and line_items (COUNT of rows in order_lines per order) where count >= 2; ORDER BY order_id.',
+      starterCode:
+        'SELECT o.id AS order_id,\nFROM orders o\nJOIN order_lines ol ON ol.order_id = o.id\nGROUP BY o.id\nHAVING \nORDER BY o.id;',
+      expectedQuery: `SELECT o.id AS order_id, COUNT(*) AS line_items
+FROM orders o
+JOIN order_lines ol ON ol.order_id = o.id
+GROUP BY o.id
+HAVING COUNT(*) >= 2
+ORDER BY o.id;`,
+      validation: {
+        strategy: ['result_match'],
+        orderSensitive: true,
+        expectedRowCount: 4,
+        expectedColumns: ['order_id', 'line_items'],
+      },
+      parTimeSeconds: 280,
+      xpReward: 340,
+      relevantTables: ['orders', 'order_lines'],
     },
   ],
 );
