@@ -49,16 +49,19 @@ export function Dashboard() {
           </p>
           <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
             Build fundamentals through Summit, then tackle the{' '}
-            <Link to="/learn/14-1" className="font-medium text-[var(--accent-primary)] hover:underline">
+            <Link to="/learn?t=grind" className="font-medium text-[var(--accent-primary)] hover:underline">
               SQL Grind
             </Link>{' '}
             (interview-style). Next,{' '}
-            <Link to="/learn/31-1" className="font-medium text-[var(--accent-info)] hover:underline">
+            <Link to="/learn?t=windows" className="font-medium text-[var(--accent-info)] hover:underline">
               Window functions lab
             </Link>{' '}
             (World 31) adds FIRST_VALUE, LAG/LEAD, and moving frames — finish every level there to earn
-            the Pane breaker achievement — then open Interview bank (worlds 40–49) for 300 Summit drills,
-            then any industry world for scenario reps. The{' '}
+            the Pane breaker achievement — then open{' '}
+            <Link to="/learn?t=bank" className="font-medium text-[var(--accent-primary)] hover:underline">
+              Interview bank
+            </Link>{' '}
+            (worlds 40–49) for 300 Summit drills, then any industry world for scenario reps. The{' '}
             <Link to="/learn/mongo" className="font-medium text-[var(--accent-primary)] hover:underline">
               Mongo track
             </Link>{' '}
@@ -195,19 +198,19 @@ export function Dashboard() {
             SQL course
           </Link>
           <Link
-            to="/learn/14-1"
+            to="/learn?t=grind"
             className="rounded-xl border border-[var(--accent-warning)]/35 bg-[var(--accent-warning)]/10 px-5 py-3 text-sm font-semibold text-[var(--text-primary)]"
           >
             SQL Grind (interview)
           </Link>
           <Link
-            to="/learn/31-1"
+            to="/learn?t=windows"
             className="rounded-xl border border-[var(--accent-info)]/35 bg-[var(--accent-info)]/10 px-5 py-3 text-sm font-semibold text-[var(--text-primary)]"
           >
             Window functions lab
           </Link>
           <Link
-            to="/learn/40-1"
+            to="/learn?t=bank"
             className="rounded-xl border border-[var(--accent-primary)]/35 bg-[var(--accent-primary)]/10 px-5 py-3 text-sm font-semibold text-[var(--text-primary)]"
           >
             Interview bank (300 drills)

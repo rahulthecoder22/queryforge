@@ -5,6 +5,7 @@ import { ResultsTable } from '@/components/editor/ResultsTable';
 import { SchemaExplorer } from '@/components/editor/SchemaExplorer';
 import { getBundledSampleSql } from '@/data/databases/loadSampleSql';
 import { getLevel, getNextLevelId } from '@/data/courses';
+import { learnHubPathForWorldId } from '@/config/sqlLearnTracks';
 import { SCRATCH_SQL_STARTER } from '@/data/courses/scratchChallenges';
 import { resolveSqlTheory } from '@/data/courses/sqlTheoryResolver';
 import {
@@ -175,13 +176,14 @@ function ChallengeSession({ levelId }: { levelId: string }) {
   const hints = level.hints;
   const nextLevelId = getNextLevelId(levelId);
   const currentComplete = levelsCompleted[level.id]?.completed === true;
+  const learnHubHref = learnHubPathForWorldId(world.id);
 
   return (
     <div className="flex h-full flex-col overflow-hidden bg-transparent">
       <QueryCelebration burstKey={celebrateKey} />
       <header className="qf-glass flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--border-subtle)] px-3 py-2 pl-14 md:px-4 md:py-3 md:pl-16">
         <div className="min-w-0">
-          <Link to="/learn" className="text-[10px] text-[var(--accent-info)] hover:underline md:text-xs">
+          <Link to={learnHubHref} className="text-[10px] text-[var(--accent-info)] hover:underline md:text-xs">
             ← Course map
           </Link>
           <h1 className="qf-display truncate text-base font-bold md:text-lg">
@@ -241,7 +243,7 @@ function ChallengeSession({ levelId }: { levelId: string }) {
           ) : null}
           {currentComplete && !nextLevelId ? (
             <span className="text-[10px] text-[var(--text-secondary)]">
-              <Link to="/learn" className="text-[var(--accent-info)] hover:underline">
+              <Link to={learnHubHref} className="text-[var(--accent-info)] hover:underline">
                 Done
               </Link>
             </span>
