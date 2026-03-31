@@ -16,6 +16,7 @@ import { world13 } from './worlds/world13';
 import { world14 } from './worlds/world14';
 import { world31WindowLab } from './worlds/world31WindowLab';
 import { withScratchSqlStarters } from './scratchChallenges';
+import { interviewBankWorlds } from '@/data/interviewBank/loadInterviewBankWorlds';
 import { worldsUniformIndustries } from './worlds/worldsUniformIndustries';
 
 export const worlds: World[] = [
@@ -34,6 +35,7 @@ export const worlds: World[] = [
   world13,
   world14,
   world31WindowLab,
+  ...interviewBankWorlds,
   ...worldsUniformIndustries,
 ].map(withScratchSqlStarters);
 

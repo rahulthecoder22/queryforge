@@ -17,11 +17,10 @@ export function CourseMap() {
     <div className="h-full overflow-auto p-8">
       <h1 className="text-2xl font-bold text-[var(--text-primary)]">SQL course map</h1>
       <p className="mt-2 max-w-2xl text-sm text-[var(--text-secondary)]">
-        {worlds.length} worlds, {totalLevels} levels — fundamentals through analytics, plus the SQL
-        Grind Set (interview SQL), then the Window lab (ROW_NUMBER, running SUM, LAG, RANK, NTILE),
-        then industry scenarios. Each challenge lists constraints, a solve guide, and five progressive
-        hints. Jump anywhere;
-        progress and XP still save.
+        {worlds.length} worlds, {totalLevels} levels — fundamentals through analytics, SQL Grind, Window
+        lab, then ten Interview bank worlds (300 Easy–Medium analytics drills on the Summit schema —
+        original scenarios, same patterns as coding interviews), then industry packs. Constraints,
+        solve guides, and hints stay non-spoiler. Jump anywhere; progress and XP still save.
       </p>
       <p className="mt-3 text-sm">
         <Link

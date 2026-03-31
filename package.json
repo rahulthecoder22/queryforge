@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write \"src/**/*.{ts,tsx}\" \"electron/**/*.ts\"",
+    "generate:interview-bank": "node scripts/generate-interview-bank.mjs",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "typecheck": "tsc -b && tsc -p electron/tsconfig.json --noEmit",

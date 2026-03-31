@@ -55,7 +55,8 @@ export function Dashboard() {
               Window functions lab
             </Link>{' '}
             (World 31) adds FIRST_VALUE, LAG/LEAD, and moving frames — finish every level there to earn
-            the Pane breaker achievement — then open any industry world for scenario reps. The{' '}
+            the Pane breaker achievement — then open Interview bank (worlds 40–49) for 300 Summit drills,
+            then any industry world for scenario reps. The{' '}
             <Link to="/learn/mongo" className="font-medium text-[var(--accent-primary)] hover:underline">
               Mongo track
             </Link>{' '}
@@ -186,6 +187,12 @@ export function Dashboard() {
             className="rounded-xl border border-[var(--accent-info)]/35 bg-[var(--accent-info)]/10 px-5 py-3 text-sm font-semibold text-[var(--text-primary)]"
           >
             Window functions lab
+          </Link>
+          <Link
+            to="/learn/40-1"
+            className="rounded-xl border border-[var(--accent-primary)]/35 bg-[var(--accent-primary)]/10 px-5 py-3 text-sm font-semibold text-[var(--text-primary)]"
+          >
+            Interview bank (300 drills)
           </Link>
           <Link
             to="/learn/mongo"
