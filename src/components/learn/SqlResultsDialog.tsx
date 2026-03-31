@@ -32,10 +32,14 @@ export function SqlResultsDialog({ open, onClose, result }: Props) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}
           >
-            <div
+            <motion.div
               role="dialog"
               aria-modal="true"
-              className="pointer-events-auto flex max-h-[min(88vh,900px)] w-full max-w-[min(1100px,96vw)] flex-col overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] shadow-2xl"
+              initial={{ opacity: 0, scale: 0.94, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 10 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+              className="qf-glass pointer-events-auto flex max-h-[min(88vh,900px)] w-full max-w-[min(1100px,96vw)] flex-col overflow-hidden rounded-2xl shadow-2xl shadow-black/40"
             >
             <header className="flex shrink-0 items-center justify-between border-b border-[var(--border-subtle)] px-4 py-3">
               <div>
@@ -55,7 +59,7 @@ export function SqlResultsDialog({ open, onClose, result }: Props) {
             <div className="min-h-0 flex-1 overflow-auto p-4">
               <ResultsTable result={result} maxHeight={560} />
             </div>
-            </div>
+            </motion.div>
           </motion.div>
         </>
       ) : null}

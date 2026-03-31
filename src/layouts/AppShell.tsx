@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { AmbientBackdrop } from '@/components/layout/AmbientBackdrop';
 import { Sidebar } from '@/components/shared/Sidebar';
+import { AnimatedOutlet } from '@/layouts/AnimatedOutlet';
 import { getQueryForge } from '@/lib/electron';
 import { emitExplainQuery, emitRunQuery } from '@/lib/workspaceEvents';
 import { useDatabaseStore } from '@/stores/databaseStore';
@@ -75,10 +77,11 @@ export function AppShell() {
   }, [navigate, setActiveDbPath]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[var(--bg-primary)]">
+    <div className="relative flex h-screen overflow-hidden bg-[var(--bg-primary)]">
+      <AmbientBackdrop />
       <Sidebar />
-      <main className="min-w-0 flex-1 overflow-hidden">
-        <Outlet />
+      <main className="relative z-[1] min-w-0 flex-1 overflow-hidden">
+        <AnimatedOutlet />
       </main>
     </div>
   );

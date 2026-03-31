@@ -1,4 +1,5 @@
-import { useRef } from 'react';
+import { useRef, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import type { QueryResult } from '@/types/queryforge';
 
@@ -7,8 +8,15 @@ interface ResultsTableProps {
   maxHeight?: number;
 }
 
+function resultSignature(r: QueryResult | null): string {
+  if (!r) return '∅';
+  if (r.error) return `err:${r.error.slice(0, 40)}`;
+  return `${r.type}-${r.rowCount}-${r.executionTimeMs}-${r.columns.join(',')}`;
+}
+
 export function ResultsTable({ result, maxHeight = 320 }: ResultsTableProps) {
   const parentRef = useRef<HTMLDivElement>(null);
+  const sig = useMemo(() => resultSignature(result), [result]);
 
   const gridReady =
     result != null &&
@@ -21,33 +29,51 @@ export function ResultsTable({ result, maxHeight = 320 }: ResultsTableProps) {
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 36,
+    estimateSize: () => 38,
     overscan: 16,
   });
 
   if (!result) {
     return (
-      <div className="rounded-lg border border-dashed border-[var(--border-subtle)] p-6 text-center text-sm text-[var(--text-secondary)]">
-        Run a query to see results here.
-      </div>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="qf-glass rounded-2xl border border-dashed border-[var(--border-subtle)] p-8 text-center"
+      >
+        <p className="qf-display text-sm font-medium text-[var(--text-primary)]">Ready when you are</p>
+        <p className="mt-2 text-xs text-[var(--text-secondary)]">
+          Run a query — results animate in row by row.
+        </p>
+      </motion.div>
     );
   }
 
   if (result.error) {
     return (
-      <div className="rounded-lg border border-[var(--accent-error)]/40 bg-[var(--accent-error)]/10 p-4 text-sm text-[var(--accent-error)]">
+      <motion.div
+        key={sig}
+        initial={{ opacity: 0, x: -6 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+        className="rounded-2xl border border-[var(--accent-error)]/45 bg-[var(--accent-error)]/12 px-4 py-3 text-sm text-[var(--accent-error)]"
+      >
         {result.error}
-      </div>
+      </motion.div>
     );
   }
 
   if (result.columns.length === 0) {
     return (
-      <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] p-4 text-sm text-[var(--text-secondary)]">
-        {result.type} completed
+      <motion.div
+        key={sig}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="qf-glass rounded-2xl px-4 py-3 text-sm text-[var(--text-secondary)]"
+      >
+        <span className="font-medium text-[var(--accent-success)]">{result.type}</span> completed
         {result.affectedRows != null ? ` · ${result.affectedRows} row(s) affected` : ''} ·{' '}
-        {result.executionTimeMs}ms
-      </div>
+        <span className="font-mono text-[var(--text-muted)]">{result.executionTimeMs}ms</span>
+      </motion.div>
     );
   }
 
@@ -55,68 +81,94 @@ export function ResultsTable({ result, maxHeight = 320 }: ResultsTableProps) {
   const gridTemplate = `repeat(${colCount}, minmax(120px, 1fr))`;
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap items-center gap-3 text-xs text-[var(--text-secondary)]">
-        <span>
-          {result.rowCount} row{result.rowCount === 1 ? '' : 's'}
-        </span>
-        <span>·</span>
-        <span>{result.executionTimeMs}ms</span>
-      </div>
-      <div
-        ref={parentRef}
-        className="overflow-auto rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-editor)]"
-        style={{ maxHeight }}
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={sig}
+        className="flex flex-col gap-2"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -6 }}
+        transition={{ type: 'spring', stiffness: 320, damping: 30 }}
       >
-        <div
-          className="sticky top-0 z-10 grid gap-0 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-2 py-2 text-xs font-medium text-[var(--accent-info)]"
-          style={{ gridTemplateColumns: gridTemplate }}
+        <motion.div
+          className="flex flex-wrap items-center gap-2 text-xs"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.05 }}
         >
-          {columns.map((c) => (
-            <div key={c} className="truncate px-1">
-              {c}
-            </div>
-          ))}
-        </div>
+          <span className="rounded-full bg-[var(--accent-primary)]/15 px-2.5 py-0.5 font-semibold text-[var(--accent-primary)]">
+            {result.rowCount} row{result.rowCount === 1 ? '' : 's'}
+          </span>
+          <span className="text-[var(--text-muted)]">·</span>
+          <span className="font-mono text-[var(--text-secondary)]">{result.executionTimeMs}ms</span>
+        </motion.div>
         <div
-          style={{
-            height: `${rowVirtualizer.getTotalSize()}px`,
-            width: '100%',
-            position: 'relative',
-          }}
+          ref={parentRef}
+          className="qf-glass overflow-hidden rounded-2xl"
+          style={{ maxHeight }}
         >
-          {rowVirtualizer.getVirtualItems().map((v) => {
-            const row = rows[v.index]!;
-            return (
-              <div
-                key={v.key}
-                className="absolute left-0 grid w-full border-b border-[var(--border-subtle)]/40 px-2 py-1 text-xs hover:bg-[var(--bg-tertiary)]/40"
-                style={{
-                  height: `${v.size}px`,
-                  transform: `translateY(${v.start}px)`,
-                  gridTemplateColumns: gridTemplate,
-                }}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.08, duration: 0.25 }}
+            className="sticky top-0 z-10 grid gap-0 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/95 px-2 py-2.5 text-xs font-semibold uppercase tracking-wider text-[var(--accent-info)] backdrop-blur-md"
+            style={{ gridTemplateColumns: gridTemplate }}
+          >
+            {columns.map((c, i) => (
+              <motion.div
+                key={c}
+                className="truncate px-1"
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.04 + i * 0.03 }}
               >
-                {row.map((cell, i) => (
-                  <div
-                    key={i}
-                    className="truncate font-mono text-[var(--text-primary)]"
-                    title={cell == null ? 'NULL' : String(cell)}
-                  >
-                    {cell == null ? (
-                      <span className="rounded bg-[var(--bg-tertiary)] px-1 text-[var(--text-muted)]">
-                        NULL
-                      </span>
-                    ) : (
-                      String(cell)
-                    )}
-                  </div>
-                ))}
-              </div>
-            );
-          })}
+                {c}
+              </motion.div>
+            ))}
+          </motion.div>
+          <div
+            className="bg-[var(--bg-editor)]/80"
+            style={{
+              height: `${rowVirtualizer.getTotalSize()}px`,
+              width: '100%',
+              position: 'relative',
+            }}
+          >
+            {rowVirtualizer.getVirtualItems().map((v) => {
+              const row = rows[v.index]!;
+              const delayMs = Math.min(v.index, 48) * 20;
+              return (
+                <div
+                  key={v.key}
+                  className="qf-result-row-animate absolute left-0 grid w-full border-b border-[var(--border-subtle)]/50 px-2 py-1.5 text-xs transition-colors hover:bg-[var(--accent-primary)]/6"
+                  style={{
+                    height: `${v.size}px`,
+                    transform: `translateY(${v.start}px)`,
+                    gridTemplateColumns: gridTemplate,
+                    animationDelay: `${delayMs}ms`,
+                  }}
+                >
+                  {row.map((cell, i) => (
+                    <div
+                      key={i}
+                      className="truncate font-mono text-[13px] text-[var(--text-primary)]"
+                      title={cell == null ? 'NULL' : String(cell)}
+                    >
+                      {cell == null ? (
+                        <span className="rounded-md bg-[var(--bg-tertiary)] px-1.5 py-0.5 text-[var(--text-muted)]">
+                          NULL
+                        </span>
+                      ) : (
+                        String(cell)
+                      )}
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </AnimatePresence>
   );
 }

@@ -17,7 +17,7 @@ import { useCourseStore } from '@/stores/courseStore';
 import { useSchema } from '@/hooks/useDatabase';
 import type { QueryResult } from '@/types/queryforge';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { QueryCelebration } from '@/components/effects/QueryCelebration';
+import { QueryCelebration, ResultPulse } from '@/components/effects/QueryCelebration';
 import { ChallengeMetaPanel } from '@/components/learn/ChallengeMetaPanel';
 import { HintsSlideOver } from '@/components/learn/HintsSlideOver';
 import { LessonLearnPanel } from '@/components/learn/LessonLearnPanel';
@@ -49,6 +49,7 @@ function ChallengeSession({ levelId }: { levelId: string }) {
   const [sqlResultsOpen, setSqlResultsOpen] = useState(false);
   const [schemaOpen, setSchemaOpen] = useState(false);
   const [mobileTab, setMobileTab] = useState<Tab>('learn');
+  const [resultPulseKey, setResultPulseKey] = useState(0);
   const runBtnRef = useRef<HTMLButtonElement>(null);
 
   const { data: schema } = useSchema(dbPath);
@@ -121,6 +122,7 @@ function ChallengeSession({ levelId }: { levelId: string }) {
     setFeedback(null);
     if (!r.error) {
       recordQueryRun();
+      setResultPulseKey((k) => k + 1);
       runBtnRef.current?.animate(
         [{ transform: 'scale(1)' }, { transform: 'scale(1.06)' }, { transform: 'scale(1)' }],
         { duration: 280, easing: 'ease-out' },
@@ -149,6 +151,7 @@ function ChallengeSession({ levelId }: { levelId: string }) {
       found.level.validation.expectedRowCount,
     );
     setUserResult(user);
+    setResultPulseKey((k) => k + 1);
     setFeedback(v.feedback.map((f) => f.message).join('\n'));
     if (v.isCorrect) {
       completeLevel(found.level.id, 3, found.level.xpReward);
@@ -174,15 +177,18 @@ function ChallengeSession({ levelId }: { levelId: string }) {
   const currentComplete = levelsCompleted[level.id]?.completed === true;
 
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-[var(--bg-primary)]">
+    <div className="flex h-full flex-col overflow-hidden bg-transparent">
       <QueryCelebration burstKey={celebrateKey} />
-      <header className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 pl-14 md:px-4 md:py-3 md:pl-16">
+      <header className="qf-glass flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--border-subtle)] px-3 py-2 pl-14 md:px-4 md:py-3 md:pl-16">
         <div className="min-w-0">
           <Link to="/learn" className="text-[10px] text-[var(--accent-info)] hover:underline md:text-xs">
             ← Course map
           </Link>
-          <h1 className="truncate text-base font-semibold md:text-lg">
-            {world.icon} {world.name} · {level.title}
+          <h1 className="qf-display truncate text-base font-bold md:text-lg">
+            <span className="mr-1">{world.icon}</span>
+            <span className="text-[var(--text-secondary)]">{world.name}</span>
+            <span className="text-[var(--text-muted)]"> · </span>
+            <span className="text-[var(--text-primary)]">{level.title}</span>
           </h1>
           <details className="mt-1 hidden md:block">
             <summary className="cursor-pointer select-none text-[10px] text-[var(--text-muted)] hover:text-[var(--text-secondary)]">
@@ -261,8 +267,8 @@ function ChallengeSession({ levelId }: { levelId: string }) {
       </div>
 
       <div className="flex min-h-0 flex-1">
-        <aside className="hidden w-52 shrink-0 overflow-auto border-r border-[var(--border-subtle)] bg-[var(--bg-secondary)] md:block lg:w-56">
-          <div className="border-b border-[var(--border-subtle)] px-2 py-2 text-[10px] font-semibold uppercase text-[var(--text-muted)]">
+        <aside className="qf-glass hidden w-52 shrink-0 overflow-auto border-r border-[var(--border-subtle)] md:block lg:w-56">
+          <div className="border-b border-[var(--border-subtle)] px-2 py-2 text-[10px] font-bold uppercase tracking-widest text-[var(--accent-secondary)]">
             Schema
           </div>
           <SchemaExplorer schema={schema ?? null} />
@@ -309,20 +315,20 @@ function ChallengeSession({ levelId }: { levelId: string }) {
           <div
             className={`flex min-h-0 flex-col gap-3 md:col-span-7 ${mobileTab !== 'workspace' ? 'hidden md:flex' : ''}`}
           >
-            <div className="flex min-h-[200px] flex-1 flex-col rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-3">
+            <div className="qf-glass flex min-h-[200px] flex-1 flex-col rounded-2xl p-3">
               <SQLEditor value={sql} onChange={setSql} onRun={() => void run()} theme={editorTheme} />
               <div className="mt-2 flex flex-wrap gap-2">
                 <button
                   ref={runBtnRef}
                   type="button"
-                  className="rounded-xl bg-[var(--accent-primary)] px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-[var(--accent-primary)]/15"
+                  className="rounded-xl bg-gradient-to-r from-[var(--accent-primary)] to-[#5b4dff] px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[var(--accent-primary)]/25 transition hover:brightness-110 active:scale-[0.98]"
                   onClick={() => void run()}
                 >
                   Run ⌘↵
                 </button>
                 <button
                   type="button"
-                  className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-2.5 text-sm"
+                  className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/80 px-4 py-2.5 text-sm font-medium transition hover:bg-[var(--bg-secondary)]"
                   onClick={() => void check()}
                 >
                   Check answer
@@ -330,16 +336,18 @@ function ChallengeSession({ levelId }: { levelId: string }) {
                 <button
                   type="button"
                   onClick={() => setSqlResultsOpen(true)}
-                  className="rounded-xl border border-[var(--accent-info)]/50 px-4 py-2.5 text-sm font-medium text-[var(--accent-info)]"
+                  className="rounded-xl border border-[var(--accent-info)]/40 bg-[var(--accent-info)]/10 px-4 py-2.5 text-sm font-semibold text-[var(--accent-info)] transition hover:bg-[var(--accent-info)]/18"
                 >
                   Results window
                 </button>
               </div>
             </div>
 
-            <div className="flex min-h-[200px] shrink-0 flex-col gap-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-3 lg:min-h-[240px]">
+            <div className="qf-glass flex min-h-[200px] shrink-0 flex-col gap-2 rounded-2xl p-3 lg:min-h-[240px]">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-semibold uppercase text-[var(--text-muted)]">Inline results</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--accent-primary)]">
+                  Inline results
+                </span>
                 <button
                   type="button"
                   className="text-[10px] text-[var(--accent-info)] hover:underline"
@@ -348,9 +356,11 @@ function ChallengeSession({ levelId }: { levelId: string }) {
                   Expand
                 </button>
               </div>
-              <ResultsTable result={userResult} maxHeight={280} />
+              <ResultPulse pulseKey={resultPulseKey}>
+                <ResultsTable result={userResult} maxHeight={280} />
+              </ResultPulse>
               {feedback ? (
-                <pre className="max-h-32 overflow-auto whitespace-pre-wrap rounded-xl bg-[var(--bg-tertiary)] p-3 text-[11px] text-[var(--text-primary)]">
+                <pre className="max-h-32 overflow-auto whitespace-pre-wrap rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/60 p-3 text-[11px] text-[var(--text-primary)] backdrop-blur-sm">
                   {feedback}
                 </pre>
               ) : null}

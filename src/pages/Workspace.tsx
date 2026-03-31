@@ -201,7 +201,7 @@ LIMIT 20;`);
         : activeDbPath;
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col bg-transparent">
       {!isDesktop ? (
         <div className="shrink-0 border-b border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-2 text-center text-xs text-[var(--text-secondary)]">
           <strong className="text-[var(--accent-warning)]">Browser mode</strong> — SQL runs in your
@@ -212,7 +212,7 @@ LIMIT 20;`);
         </div>
       ) : null}
 
-      <header className="drag flex shrink-0 items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-4 py-2 pl-20">
+      <header className="qf-glass drag flex shrink-0 items-center justify-between border-b border-[var(--border-subtle)] px-4 py-2 pl-20">
         <div className="no-drag flex flex-wrap items-center gap-2 text-xs">
           <span className="text-[var(--text-muted)]">Database:</span>
           <span className="max-w-[min(100%,320px)] truncate font-mono text-[var(--text-primary)]">
@@ -243,7 +243,7 @@ LIMIT 20;`);
           </button>
           <button
             type="button"
-            className="rounded-lg bg-[var(--accent-primary)]/90 px-3 py-1.5 text-xs font-medium text-white hover:bg-[var(--accent-primary)]"
+            className="rounded-lg bg-gradient-to-r from-[var(--accent-primary)] to-[#5b4dff] px-3 py-1.5 text-xs font-semibold text-white shadow-md shadow-[var(--accent-primary)]/20 hover:brightness-110"
             onClick={() => void handleSample()}
           >
             Village sample
@@ -273,8 +273,8 @@ LIMIT 20;`);
       </header>
 
       <div className="flex min-h-0 flex-1">
-        <div className="w-56 shrink-0 overflow-auto border-r border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
-          <div className="border-b border-[var(--border-subtle)] px-2 py-2 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+        <div className="qf-glass w-56 shrink-0 overflow-auto border-r border-[var(--border-subtle)]">
+          <div className="border-b border-[var(--border-subtle)] px-2 py-2 text-xs font-bold uppercase tracking-widest text-[var(--accent-secondary)]">
             Schema
           </div>
           <SchemaExplorer
@@ -290,7 +290,7 @@ LIMIT 20;`);
             <div className="no-drag flex gap-2">
               <button
                 type="button"
-                className="rounded-lg bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white hover:opacity-95"
+                className="rounded-xl bg-gradient-to-r from-[var(--accent-primary)] to-[#5b4dff] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[var(--accent-primary)]/25 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
                 onClick={() => void run()}
                 disabled={!activeDbPath || executeMut.isPending}
               >
@@ -307,7 +307,7 @@ LIMIT 20;`);
             </div>
           </div>
 
-          <div className="shrink-0">
+          <div className="qf-glass shrink-0 rounded-xl p-3">
             <div className="mb-2 flex gap-2 border-b border-[var(--border-subtle)] text-sm">
               <button
                 type="button"

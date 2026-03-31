@@ -33,15 +33,17 @@ export function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         className="mx-auto max-w-3xl"
       >
-        <h1 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">
-          Welcome back
+        <h1 className="qf-display text-3xl font-bold tracking-tight text-[var(--text-primary)] md:text-4xl">
+          <span className="qf-shimmer-title bg-gradient-to-r from-[var(--text-primary)] via-[var(--accent-secondary)] to-[var(--accent-primary)] bg-clip-text text-transparent">
+            Welcome back
+          </span>
         </h1>
         <p className="mt-2 text-[var(--text-secondary)]">
           SQL workspace, document filters, and a leveled course — progress stays on this device (and
           syncs to the cloud when you ship a Pro tier).
         </p>
 
-        <div className="mt-5 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4">
+        <div className="qf-glass mt-5 rounded-2xl p-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
             Suggested path
           </p>
@@ -98,33 +100,49 @@ export function Dashboard() {
         </div>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4">
-            <div className="text-xs uppercase tracking-wide text-[var(--text-muted)]">XP</div>
-            <div className="mt-1 text-2xl font-semibold text-[var(--accent-warning)]">{totalXP}</div>
-          </div>
-          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4">
-            <div className="text-xs uppercase tracking-wide text-[var(--text-muted)]">Levels</div>
-            <div className="mt-1 text-2xl font-semibold text-[var(--accent-success)]">
-              {done}/{totalLevels}
-            </div>
-            <p className="mt-1 text-[10px] text-[var(--text-muted)]">
-              SQL {sqlLevels} + Mongo {mongoLevels}
-            </p>
-          </div>
-          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4">
-            <div className="text-xs uppercase tracking-wide text-[var(--text-muted)]">Streak</div>
-            <div className="mt-1 text-2xl font-semibold text-[var(--accent-info)]">
-              {stats.streakDays} day{stats.streakDays === 1 ? '' : 's'}
-            </div>
-            <p className="mt-1 text-[10px] text-[var(--text-muted)]">Open the app on consecutive days</p>
-          </div>
-          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4">
-            <div className="text-xs uppercase tracking-wide text-[var(--text-muted)]">Queries run</div>
-            <div className="mt-1 text-2xl font-semibold text-[var(--text-primary)]">
-              {stats.queryRunsTotal}
-            </div>
-            <p className="mt-1 text-[10px] text-[var(--text-muted)]">SQL in workspace & challenges</p>
-          </div>
+          {[
+            {
+              label: 'XP',
+              value: totalXP,
+              valueClass: 'text-[var(--accent-warning)]',
+              sub: null as string | null,
+            },
+            {
+              label: 'Levels',
+              value: `${done}/${totalLevels}`,
+              valueClass: 'text-[var(--accent-success)]',
+              sub: `SQL ${sqlLevels} + Mongo ${mongoLevels}`,
+            },
+            {
+              label: 'Streak',
+              value: `${stats.streakDays} day${stats.streakDays === 1 ? '' : 's'}`,
+              valueClass: 'text-[var(--accent-info)]',
+              sub: 'Open the app on consecutive days',
+            },
+            {
+              label: 'Queries run',
+              value: String(stats.queryRunsTotal),
+              valueClass: 'text-[var(--text-primary)]',
+              sub: 'SQL in workspace & challenges',
+            },
+          ].map((card, i) => (
+            <motion.div
+              key={card.label}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 + i * 0.04, type: 'spring', stiffness: 260, damping: 24 }}
+              whileHover={{ scale: 1.02, y: -2 }}
+              className="qf-glass rounded-xl p-4"
+            >
+              <div className="text-xs font-semibold uppercase tracking-widest text-[var(--text-muted)]">
+                {card.label}
+              </div>
+              <div className={`mt-1 text-2xl font-bold ${card.valueClass}`}>{card.value}</div>
+              {card.sub ? (
+                <p className="mt-1 text-[10px] text-[var(--text-muted)]">{card.sub}</p>
+              ) : null}
+            </motion.div>
+          ))}
         </div>
 
         <div className="mt-8">
@@ -160,7 +178,7 @@ export function Dashboard() {
         <div className="mt-10 flex flex-wrap gap-3">
           <Link
             to="/workspace"
-            className="rounded-xl bg-[var(--accent-primary)] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[var(--accent-primary)]/20"
+            className="rounded-xl bg-gradient-to-r from-[var(--accent-primary)] to-[#5b4dff] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[var(--accent-primary)]/25 transition hover:brightness-110 active:scale-[0.98]"
           >
             SQL workspace
           </Link>

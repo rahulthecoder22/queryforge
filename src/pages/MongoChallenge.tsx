@@ -101,14 +101,14 @@ function MongoChallengeSession({ levelId }: { levelId: string }) {
   const done = levelsCompleted[level.id]?.completed === true;
 
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-[var(--bg-primary)]">
+    <div className="flex h-full flex-col overflow-hidden bg-transparent">
       <QueryCelebration burstKey={celebrateKey} />
-      <header className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 pl-14 md:px-4 md:py-3 md:pl-16">
+      <header className="qf-glass flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--border-subtle)] px-3 py-2 pl-14 md:px-4 md:py-3 md:pl-16">
         <div className="min-w-0">
           <Link to="/learn/mongo" className="text-[10px] text-[var(--accent-info)] hover:underline md:text-xs">
             ← Mongo course map
           </Link>
-          <h1 className="truncate text-base font-semibold text-[var(--text-primary)] md:text-lg">
+          <h1 className="qf-display truncate text-base font-semibold text-[var(--text-primary)] md:text-lg">
             {world.icon} {world.name} · {level.title}
           </h1>
         </div>
@@ -129,7 +129,7 @@ function MongoChallengeSession({ levelId }: { levelId: string }) {
           {done && nextId ? (
             <Link
               to={`/learn/mongo/${nextId}`}
-              className="rounded-lg bg-[var(--accent-primary)] px-3 py-1.5 text-xs font-medium text-white hover:opacity-95 md:px-4 md:py-2 md:text-sm"
+              className="rounded-lg bg-gradient-to-r from-[var(--accent-primary)] to-[#5b4dff] px-3 py-1.5 text-xs font-semibold text-white shadow-md shadow-[var(--accent-primary)]/20 hover:brightness-110 md:px-4 md:py-2 md:text-sm"
             >
               Next →
             </Link>
@@ -138,7 +138,7 @@ function MongoChallengeSession({ levelId }: { levelId: string }) {
       </header>
 
       {/* Mobile: theory first, then practice */}
-      <div className="flex shrink-0 gap-1 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-2 md:hidden">
+      <div className="qf-glass flex shrink-0 gap-1 border-b border-[var(--border-subtle)] p-2 md:hidden">
         {(['learn', 'practice'] as const).map((tab) => (
           <button
             key={tab}
@@ -146,7 +146,7 @@ function MongoChallengeSession({ levelId }: { levelId: string }) {
             onClick={() => setMobileTab(tab)}
             className={`flex-1 rounded-lg py-2 text-xs font-medium capitalize transition-colors ${
               mobileTab === tab
-                ? 'bg-[var(--accent-primary)] text-white'
+                ? 'bg-gradient-to-r from-[var(--accent-primary)] to-[#5b4dff] font-semibold text-white shadow-md shadow-[var(--accent-primary)]/20'
                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
             }`}
           >
@@ -194,7 +194,7 @@ function MongoChallengeSession({ levelId }: { levelId: string }) {
         <div
           className={`flex min-h-0 flex-col gap-3 md:col-span-4 ${mobileTab !== 'practice' ? 'hidden md:flex' : ''}`}
         >
-          <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4 ring-1 ring-[var(--border-subtle)]/60">
+          <div className="qf-glass rounded-2xl p-4 ring-1 ring-[var(--border-subtle)]/40">
             <label className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-muted)]" htmlFor="mongo-filter">
               Filter (JSON)
             </label>
@@ -208,7 +208,7 @@ function MongoChallengeSession({ levelId }: { levelId: string }) {
             <div className="mt-3 flex flex-wrap gap-2">
               <button
                 type="button"
-                className="rounded-xl bg-[var(--accent-primary)] px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-[var(--accent-primary)]/20 hover:opacity-95"
+                className="rounded-xl bg-gradient-to-r from-[var(--accent-primary)] to-[#5b4dff] px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[var(--accent-primary)]/25 transition hover:brightness-110 active:scale-[0.98]"
                 onClick={() => runPreview()}
               >
                 Run filter
@@ -243,7 +243,7 @@ function MongoChallengeSession({ levelId }: { levelId: string }) {
 
         {/* Desktop preview strip — never competes with hints (hints are off-canvas) */}
         <div className="hidden min-h-0 flex-col gap-2 md:col-span-3 md:flex">
-          <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-3">
+          <div className="qf-glass flex min-h-0 flex-1 flex-col rounded-2xl p-3">
             <div className="flex items-center justify-between gap-2">
               <span className="text-[10px] font-semibold uppercase text-[var(--text-muted)]">Live preview</span>
               <span className="text-[10px] text-[var(--text-muted)]">

@@ -15,7 +15,11 @@ export function CourseMap() {
 
   return (
     <div className="h-full overflow-auto p-8">
-      <h1 className="text-2xl font-bold text-[var(--text-primary)]">SQL course map</h1>
+      <h1 className="qf-display text-2xl font-bold tracking-tight text-[var(--text-primary)] md:text-3xl">
+        <span className="qf-shimmer-title bg-gradient-to-r from-[var(--text-primary)] via-[var(--accent-primary)] to-[var(--accent-secondary)] bg-clip-text text-transparent">
+          SQL course map
+        </span>
+      </h1>
       <p className="mt-2 max-w-2xl text-sm text-[var(--text-secondary)]">
         {worlds.length} worlds, {totalLevels} levels — fundamentals through analytics, SQL Grind, Window
         lab, then ten Interview bank worlds (300 Easy–Medium analytics drills on the Summit schema —
@@ -42,9 +46,10 @@ export function CourseMap() {
               key={w.id}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.03 }}
-              className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5"
-              style={{ boxShadow: `0 0 0 1px ${w.color}22` }}
+              transition={{ delay: i * 0.03, type: 'spring', stiffness: 280, damping: 26 }}
+              whileHover={{ y: -4, scale: 1.01 }}
+              className="qf-glass rounded-2xl p-5"
+              style={{ boxShadow: `0 0 0 1px ${w.color}33, 0 12px 40px -12px ${w.color}44` }}
             >
               <div className="flex items-start justify-between gap-2">
                 <div>
