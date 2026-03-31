@@ -230,13 +230,17 @@ LIMIT 1;`,
   ],
 );
 
+const sgHospital = (s: string) =>
+  `${s}\n\nRead the yellow **Problem pack** box for the exact columns and filters. The lesson diagram may use another dataset (ships, voyages) only to show SQL shape — your tables are listed under “Tables”.`;
+
 export const world04 = buildWorld(
   {
     id: 4,
     name: 'The Bridge of JOINs',
     subtitle: 'Healthcare',
     theme: 'hospital',
-    description: 'Patients, doctors, departments — INNER and filtered JOINs.',
+    description:
+      'Patients, doctors, departments — INNER and filtered JOINs. Each level states the business question first; the previous level is often the warm-up for the boss.',
     database: 'city_hospital.sql',
     icon: '🏥',
     color: '#f472b6',
@@ -341,9 +345,19 @@ WHERE dept.floor = 4;`,
     {
       title: 'Appointments per doctor',
       isBoss: false,
-      story: 'Volume by doctor.',
+      difficulty: 'Medium',
+      constraints: [
+        'Each output row is one doctor.',
+        'Columns: doctor_id and appts (appointment row count for that doctor).',
+        'Use the appointments table only.',
+      ],
+      solveGuide: sgHospital(
+        'Count how many rows in appointments belong to each doctor_id. That number is “how many appointments that doctor has” in this dataset.',
+      ),
+      story:
+        'Scheduling is building a load report: for every doctor who appears in appointments, how many appointment rows do they have?',
       concept: 'GROUP BY',
-      task: 'doctor_id, COUNT(*) AS appts FROM appointments GROUP BY doctor_id.',
+      task: 'Return a table with one row per doctor_id: column doctor_id and column appts = COUNT(*) of appointments for that doctor.',
       starterCode:
         'SELECT doctor_id, COUNT(*) AS appts\nFROM appointments\nGROUP BY doctor_id;',
       expectedQuery:
@@ -386,9 +400,21 @@ WHERE dept.floor = 4;`,
     {
       title: 'Hospital Boss: busiest doctor',
       isBoss: true,
-      story: 'Among doctors tied for most appointments, pick the smallest doctor_id.',
+      difficulty: 'Hard',
+      constraints: [
+        'You only need the appointments table.',
+        'Output exactly one row.',
+        'Columns must be named doctor_id and c.',
+        'c = number of appointment rows for that doctor (same idea as “appts” on the previous level).',
+        'Winner = doctor with the largest c. If two doctors share the same top count, pick the one with the smaller doctor_id.',
+      ],
+      solveGuide: sgHospital(
+        '1) Group appointments by doctor_id and count rows — that gives each doctor’s load.\n2) Sort those summaries so the highest count is first, and when counts tie, the smaller doctor_id comes first.\n3) Keep only the first row (LIMIT 1).',
+      ),
+      story:
+        'Ops wants a single answer: which doctor has the heaviest schedule in this database — meaning the most rows in appointments? If there is a tie for first place, report the doctor with the lower doctor_id so the answer is deterministic.',
       concept: 'GROUP BY + ORDER BY',
-      task: 'doctor_id, COUNT(*) AS c — ORDER BY c DESC, doctor_id ASC LIMIT 1 (tie-break).',
+      task: 'Return one row: doctor_id and c (the appointment count for that doctor). It must be the doctor with the maximum appointment count; break ties by choosing the smallest doctor_id.',
       starterCode:
         'SELECT doctor_id, COUNT(*) AS c\nFROM appointments\nGROUP BY doctor_id\nORDER BY c DESC, doctor_id ASC\nLIMIT 1;',
       expectedQuery: `SELECT doctor_id, COUNT(*) AS c

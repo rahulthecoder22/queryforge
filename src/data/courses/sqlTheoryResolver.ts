@@ -134,6 +134,10 @@ const lib: Record<string, LessonTheory> = {
     goal: 'After counting per group, pick the group with the highest metric.',
     steps: [
       {
+        title: 'Use your level’s tables',
+        body: 'Examples may show ships/voyages or cargo — your challenge lists the real tables (e.g. appointments). The pattern is the same: GROUP BY the id you need, COUNT or SUM rows in that group.',
+      },
+      {
         title: 'Aggregate first',
         body: 'GROUP BY your key and compute COUNT / SUM / AVG as required.',
       },
@@ -143,11 +147,18 @@ const lib: Record<string, LessonTheory> = {
         sql: 'SELECT ship_id, COUNT(*) AS voyage_count\nFROM voyages\nGROUP BY ship_id\nORDER BY voyage_count DESC;',
       },
       {
+        title: 'Tie-break, then one row',
+        body: 'If the spec says “when counts tie, pick the smallest id”, add a second sort key: ORDER BY voyage_count DESC, ship_id ASC, then LIMIT 1.',
+      },
+      {
         title: 'Keep one winner',
-        body: 'LIMIT 1 returns a single row—the top bucket after sorting.',
+        body: 'LIMIT 1 returns a single row—the first row after sorting.',
       },
     ],
-    checklist: ['ORDER BY runs after GROUP BY', 'Ties: two groups with the same max both appear until you LIMIT'],
+    checklist: [
+      'ORDER BY runs after GROUP BY',
+      'Same top count? Add a second ORDER BY column before LIMIT 1',
+    ],
   }),
 
   orderLimit: guide('none', {
