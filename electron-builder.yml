@@ -1,0 +1,22 @@
+appId: com.queryforge.app
+productName: QueryForge
+copyright: Copyright © 2026 QueryForge
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - package.json
+asarUnpack:
+  - '**/node_modules/sql.js/dist/**'
+extraResources:
+  - from: src/data/databases
+    to: databases
+    filter:
+      - '**/*.sql'
+directories:
+  output: release
+  buildResources: build
+mac:
+  category: public.app-category.developer-tools
+  target:
+    - dmg
+    - zip

@@ -1,0 +1,53 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+:root {
+  --bg-primary: #0f1117;
+  --bg-secondary: #1a1d2e;
+  --bg-tertiary: #252a3a;
+  --bg-editor: #12141f;
+  --text-primary: #e4e6f0;
+  --text-secondary: #8b90a5;
+  --text-muted: #4a4f65;
+  --accent-primary: #6c63ff;
+  --accent-success: #4ade80;
+  --accent-warning: #fbbf24;
+  --accent-error: #f87171;
+  --accent-info: #38bdf8;
+  --border-subtle: #2a2f42;
+}
+
+[data-theme='dawn'] {
+  --bg-primary: #faf9f7;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f2f0ed;
+  --bg-editor: #ffffff;
+  --text-primary: #1a1a2e;
+  --text-secondary: #64648c;
+  --text-muted: #a0a0b8;
+  --border-subtle: #e5e2dc;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.drag {
+  -webkit-app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+}
