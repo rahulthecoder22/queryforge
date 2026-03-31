@@ -84,7 +84,8 @@ export function ResultsTable({ result, maxHeight = 320 }: ResultsTableProps) {
     <AnimatePresence mode="wait">
       <motion.div
         key={sig}
-        className="flex flex-col gap-2"
+        className="flex min-h-0 max-w-full flex-col gap-2"
+        style={{ maxHeight }}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -6 }}
@@ -102,16 +103,12 @@ export function ResultsTable({ result, maxHeight = 320 }: ResultsTableProps) {
           <span className="text-[var(--text-muted)]">·</span>
           <span className="font-mono text-[var(--text-secondary)]">{result.executionTimeMs}ms</span>
         </motion.div>
-        <div
-          ref={parentRef}
-          className="qf-glass overflow-hidden rounded-2xl"
-          style={{ maxHeight }}
-        >
+        <div className="qf-glass flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.08, duration: 0.25 }}
-            className="sticky top-0 z-10 grid gap-0 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/95 px-2 py-2.5 text-xs font-semibold uppercase tracking-wider text-[var(--accent-info)] backdrop-blur-md"
+            className="grid shrink-0 gap-0 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/95 px-2 py-2.5 text-xs font-semibold uppercase tracking-wider text-[var(--accent-info)] backdrop-blur-md"
             style={{ gridTemplateColumns: gridTemplate }}
           >
             {columns.map((c, i) => (
@@ -127,13 +124,20 @@ export function ResultsTable({ result, maxHeight = 320 }: ResultsTableProps) {
             ))}
           </motion.div>
           <div
-            className="bg-[var(--bg-editor)]/80"
-            style={{
-              height: `${rowVirtualizer.getTotalSize()}px`,
-              width: '100%',
-              position: 'relative',
-            }}
+            ref={parentRef}
+            className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-auto overscroll-contain bg-[var(--bg-editor)]/80"
+            tabIndex={0}
+            role="region"
+            aria-label="Query result rows"
           >
+            <div
+              className="min-w-max"
+              style={{
+                height: `${rowVirtualizer.getTotalSize()}px`,
+                width: '100%',
+                position: 'relative',
+              }}
+            >
             {rowVirtualizer.getVirtualItems().map((v) => {
               const row = rows[v.index]!;
               const delayMs = Math.min(v.index, 48) * 20;
@@ -166,6 +170,7 @@ export function ResultsTable({ result, maxHeight = 320 }: ResultsTableProps) {
                 </div>
               );
             })}
+            </div>
           </div>
         </div>
       </motion.div>

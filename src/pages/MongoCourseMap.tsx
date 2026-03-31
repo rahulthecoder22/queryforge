@@ -22,9 +22,22 @@ export function MongoCourseMap() {
   const total = mongoWorlds.reduce((n, w) => n + w.levels.length, 0);
 
   return (
-    <div className="h-full overflow-auto p-8">
-      <h1 className="text-2xl font-bold text-[var(--text-primary)]">MongoDB course map</h1>
-      <p className="mt-2 max-w-2xl text-sm text-[var(--text-secondary)]">
+    <div className="relative h-full overflow-auto bg-transparent p-6 md:p-8">
+      <div
+        className="pointer-events-none absolute right-10 top-10 h-56 w-56 rounded-full opacity-20 blur-[88px]"
+        style={{ background: '#34d399' }}
+        aria-hidden
+      />
+      <div className="relative mx-auto max-w-6xl">
+        <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-[var(--accent-info)]">
+          Document track
+        </p>
+        <h1 className="qf-display text-2xl font-extrabold tracking-tight text-[var(--text-primary)] md:text-4xl">
+          <span className="qf-shimmer-title bg-gradient-to-r from-[var(--text-primary)] via-[var(--accent-info)] to-[var(--accent-secondary)] bg-clip-text text-transparent">
+            MongoDB course map
+          </span>
+        </h1>
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--text-secondary)] md:text-base">
         {mongoWorlds.length} modules, {total} challenges — LeetCode-style JSON filters on local
         documents (no server). Each problem has constraints, a “how to think” guide, and five
         progressive hints (canonical answer on the last tier). Jump anywhere; XP still saves.
@@ -36,7 +49,7 @@ export function MongoCourseMap() {
         <span className="text-[var(--text-muted)]">(fundamentals, Grind, windows, industries)</span>
       </p>
 
-      <div className="mt-8 grid gap-4 md:grid-cols-2">
+        <div className="mt-8 grid gap-4 md:grid-cols-2">
         {mongoWorlds.map((w, i) => {
           const done = w.levels.filter((l) => levelsCompleted[l.id]?.completed).length;
           return (
@@ -45,8 +58,8 @@ export function MongoCourseMap() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.03 }}
-              className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5"
-              style={{ boxShadow: `0 0 0 1px ${w.color}22` }}
+              className="qf-glass rounded-2xl p-5"
+              style={{ boxShadow: `0 0 0 1px ${w.color}33, 0 12px 40px -12px ${w.color}44` }}
             >
               <div className="flex items-start justify-between gap-2">
                 <div>
@@ -94,6 +107,7 @@ export function MongoCourseMap() {
             </motion.div>
           );
         })}
+        </div>
       </div>
     </div>
   );

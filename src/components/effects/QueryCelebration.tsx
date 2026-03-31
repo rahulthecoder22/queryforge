@@ -94,7 +94,7 @@ export function ResultPulse({ pulseKey, children }: ResultPulseProps) {
         boxShadow: '0 0 0 0px rgba(124, 108, 255, 0)',
       }}
       transition={{ type: 'spring', stiffness: 420, damping: 26 }}
-      className="rounded-2xl"
+      className="min-h-0 min-w-0 overflow-hidden rounded-2xl"
     >
       {children}
     </motion.div>

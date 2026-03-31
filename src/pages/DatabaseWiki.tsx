@@ -6,12 +6,13 @@ import type { WikiCategory } from '@/data/wiki/types';
 import { WikiArticleView } from '@/components/learn/WikiArticleView';
 import { SQL_MASTERCLASS, MONGO_MASTERCLASS } from '@/lib/masterclass/curriculum';
 
-const CATS: Array<'all' | WikiCategory | 'Syllabus'> = [
+const CATS: Array<'all' | WikiCategory | 'Syllabus' | 'Concept deck'> = [
   'all',
   'SQL',
   'MongoDB',
   'Concepts',
   'Visual guides',
+  'Concept deck',
   'Syllabus',
 ];
 
@@ -26,7 +27,9 @@ export function DatabaseWiki() {
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
     return WIKI_ARTICLES.filter((a) => {
-      if (cat !== 'all' && cat !== 'Syllabus' && a.category !== cat) return false;
+      if (cat === 'Concept deck') {
+        if (!a.tags.includes('concept-deck')) return false;
+      } else if (cat !== 'all' && cat !== 'Syllabus' && a.category !== cat) return false;
       if (!s) return true;
       const inSummary = a.summary.toLowerCase().includes(s);
       const inSection = a.sections.some(
@@ -79,35 +82,54 @@ export function DatabaseWiki() {
   };
 
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-[var(--bg-primary)]">
-      <header className="shrink-0 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-4 py-4 pl-16 md:pl-20">
-        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[var(--accent-primary)]">Reference</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">Database wiki</h1>
-        <p className="mt-1 max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)]">
-          {WIKI_ARTICLES.length} in-depth articles across SQL, MongoDB, system concepts, and visual-lab companions.
-          Each page has sections, examples, and cross-links — use search or category chips to narrow.
+    <div className="relative flex h-full flex-col overflow-hidden bg-transparent">
+      <div
+        className="pointer-events-none absolute right-0 top-0 h-72 w-72 rounded-full opacity-20 blur-[100px]"
+        style={{ background: 'var(--accent-primary)' }}
+        aria-hidden
+      />
+      <header className="qf-glass relative shrink-0 border-b border-[var(--border-subtle)] px-4 py-6 pl-16 md:pl-20">
+        <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-[var(--accent-secondary)]">Reference</p>
+        <h1 className="qf-display mt-2 text-3xl font-extrabold tracking-tight text-[var(--text-primary)] md:text-4xl">
+          <span className="qf-shimmer-title bg-gradient-to-r from-[var(--text-primary)] via-[var(--accent-primary)] to-[var(--accent-secondary)] bg-clip-text text-transparent">
+            Database wiki
+          </span>
+        </h1>
+        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)] md:text-base">
+          {WIKI_ARTICLES.length} articles — curated deep dives plus a{' '}
+          <strong className="text-[var(--text-primary)]">500-topic concept deck</strong> for breadth. Search, filter by
+          category, or open the concept deck for quick glossary-style pages tied to SQL, MongoDB, and systems ideas.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Link
             to="/masterclass"
-            className="rounded-lg border border-[var(--border-subtle)] px-3 py-1.5 text-xs text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]"
+            className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/60 px-4 py-2 text-xs font-semibold text-[var(--text-primary)] transition hover:bg-[var(--glass-highlight)]"
           >
             Masterclass Visual lab
           </Link>
-          <Link to="/learn" className="rounded-lg border border-[var(--border-subtle)] px-3 py-1.5 text-xs hover:bg-[var(--bg-tertiary)]">
+          <Link
+            to="/learn"
+            className="rounded-xl border border-[var(--border-subtle)] px-4 py-2 text-xs font-semibold hover:bg-[var(--glass-highlight)]"
+          >
             SQL course
           </Link>
-          <Link to="/learn/mongo" className="rounded-lg border border-[var(--border-subtle)] px-3 py-1.5 text-xs hover:bg-[var(--bg-tertiary)]">
+          <Link
+            to="/learn/mongo"
+            className="rounded-xl border border-[var(--border-subtle)] px-4 py-2 text-xs font-semibold hover:bg-[var(--glass-highlight)]"
+          >
             Mongo course
           </Link>
-          <Link to="/workspace" className="rounded-lg border border-[var(--border-subtle)] px-3 py-1.5 text-xs hover:bg-[var(--bg-tertiary)]">
+          <Link
+            to="/workspace"
+            className="rounded-xl bg-gradient-to-r from-[var(--accent-primary)] to-[#5b4dff] px-4 py-2 text-xs font-semibold text-white shadow-md shadow-[var(--accent-primary)]/20 hover:brightness-110"
+          >
             Workspace
           </Link>
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-        <aside className="flex max-h-[38vh] shrink-0 flex-col border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)] lg:max-h-none lg:w-[min(100%,320px)] lg:border-b-0 lg:border-r xl:w-96">
+      <div className="relative flex min-h-0 flex-1 flex-col lg:flex-row">
+        <aside className="qf-glass flex max-h-[38vh] shrink-0 flex-col border-b border-[var(--border-subtle)] lg:max-h-none lg:w-[min(100%,320px)] lg:border-b-0 lg:border-r xl:w-96">
           <div className="border-b border-[var(--border-subtle)] p-3">
             <input
               type="search"
@@ -165,7 +187,7 @@ export function DatabaseWiki() {
           </nav>
         </aside>
 
-        <main className="min-h-0 flex-1 overflow-y-auto p-4 md:p-8">
+        <main className="min-h-0 flex-1 overflow-y-auto p-4 md:p-8 lg:bg-transparent">
           <AnimatePresence mode="wait">
             {cat === 'Syllabus' ? (
               <motion.div

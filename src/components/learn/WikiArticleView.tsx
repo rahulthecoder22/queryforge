@@ -18,7 +18,7 @@ function SectionBody({ text }: { text: string }) {
         const nonEmpty = lines.filter((l) => l.trim().length > 0);
         const isBulletBlock =
           nonEmpty.length > 0 &&
-          nonEmpty.every((l) => /^[•\-]\s/.test(l) || /^\d+\.\s/.test(l));
+          nonEmpty.every((l) => /^(?:•|-)\s/.test(l) || /^\d+\.\s/.test(l));
 
         if (isBulletBlock) {
           return (
@@ -27,7 +27,7 @@ function SectionBody({ text }: { text: string }) {
               className="list-disc space-y-2 pl-5 marker:text-[var(--accent-primary)] [li]:pl-1"
             >
               {nonEmpty.map((line, li) => {
-                const cleaned = line.replace(/^[•\-]\s/, '').replace(/^\d+\.\s/, '');
+                const cleaned = line.replace(/^(?:•|-)\s/, '').replace(/^\d+\.\s/, '');
                 return (
                   <li key={li} className="whitespace-pre-wrap">
                     {cleaned}

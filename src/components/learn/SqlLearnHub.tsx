@@ -1,3 +1,4 @@
+import { useMemo, useState, useTransition } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { World } from '@/data/courses/types';
@@ -21,20 +22,32 @@ type Props = {
   worlds: World[];
 };
 
+const LEVEL_PREVIEW = 8;
+
 export function SqlLearnHub({ worlds }: Props) {
   const [params, setParams] = useSearchParams();
+  const [, startTransition] = useTransition();
   const trackId = parseSqlLearnTrackParam(params.get('t'));
   const levelsCompleted = useCourseStore((s) => s.levelsCompleted);
   const track = SQL_LEARN_TRACKS.find((x) => x.id === trackId) ?? SQL_LEARN_TRACKS[0]!;
-  const filtered = worldsForSqlLearnTrack(trackId, worlds);
-  const totalLevels = worlds.reduce((n, w) => n + w.levels.length, 0);
-  const startPath = firstLevelPathInTrack(trackId, worlds);
+  const totalLevels = useMemo(() => worlds.reduce((n, w) => n + w.levels.length, 0), [worlds]);
+  const trackCounts = useMemo(() => {
+    const m = new Map<SqlLearnTrackId, number>();
+    for (const t of SQL_LEARN_TRACKS) {
+      m.set(t.id, worldsForSqlLearnTrack(t.id, worlds).length);
+    }
+    return m;
+  }, [worlds]);
+  const filtered = useMemo(() => worldsForSqlLearnTrack(trackId, worlds), [trackId, worlds]);
+  const startPath = useMemo(() => firstLevelPathInTrack(trackId, worlds), [trackId, worlds]);
 
   function setTrack(id: SqlLearnTrackId) {
-    const next = new URLSearchParams(params);
-    if (id === 'foundation') next.delete('t');
-    else next.set('t', id);
-    setParams(next, { replace: true });
+    startTransition(() => {
+      const next = new URLSearchParams(params);
+      if (id === 'foundation') next.delete('t');
+      else next.set('t', id);
+      setParams(next, { replace: true });
+    });
   }
 
   return (
@@ -76,7 +89,7 @@ export function SqlLearnHub({ worlds }: Props) {
         >
           {SQL_LEARN_TRACKS.map((t, i) => {
             const active = t.id === trackId;
-            const count = worldsForSqlLearnTrack(t.id, worlds).length;
+            const count = trackCounts.get(t.id) ?? 0;
             return (
               <motion.button
                 key={t.id}
@@ -148,7 +161,11 @@ export function SqlLearnHub({ worlds }: Props) {
           Worlds in this track
         </motion.h2>
 
-        <WorldGrid worlds={filtered} levelsCompleted={levelsCompleted} />
+        <WorldGrid
+          worlds={filtered}
+          levelsCompleted={levelsCompleted}
+          levelPreview={LEVEL_PREVIEW}
+        />
 
         <motion.div
           initial={{ opacity: 0 }}
@@ -303,10 +320,14 @@ function HeroOrbit({ accent, icon, label }: { accent: string; icon: string; labe
 function WorldGrid({
   worlds,
   levelsCompleted,
+  levelPreview,
 }: {
   worlds: World[];
   levelsCompleted: Record<string, { completed: boolean; stars: number; completedAt?: string }>;
+  levelPreview: number;
 }) {
+  const [expandedWorlds, setExpandedWorlds] = useState<Record<number, boolean>>({});
+
   if (worlds.length === 0) {
     return (
       <p className="rounded-2xl border border-dashed border-[var(--border-subtle)] p-8 text-center text-sm text-[var(--text-muted)]">
@@ -319,14 +340,23 @@ function WorldGrid({
     <div className="grid gap-4 md:grid-cols-2">
       {worlds.map((w, i) => {
         const completedInWorld = w.levels.filter((l) => levelsCompleted[l.id]?.completed).length;
+        const expanded = expandedWorlds[w.id] === true;
+        const collapsible = w.levels.length > levelPreview;
+        const visibleLevels =
+          collapsible && !expanded ? w.levels.slice(0, levelPreview) : w.levels;
+        const hiddenCount = w.levels.length - levelPreview;
         return (
           <motion.div
             key={w.id}
-            layout
-            initial={{ opacity: 0, y: 14 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.04, type: 'spring', stiffness: 280, damping: 26 }}
-            whileHover={{ y: -4, scale: 1.01 }}
+            transition={{
+              delay: Math.min(i, 12) * 0.03,
+              type: 'spring',
+              stiffness: 320,
+              damping: 28,
+            }}
+            whileHover={{ y: -2 }}
             className="qf-glass rounded-2xl p-5"
             style={{ boxShadow: `0 0 0 1px ${w.color}33, 0 16px 48px -16px ${w.color}55` }}
           >
@@ -345,7 +375,7 @@ function WorldGrid({
             </div>
             <p className="mt-3 text-sm text-[var(--text-secondary)]">{w.description}</p>
             <ul className="mt-4 space-y-1">
-              {w.levels.map((l) => {
+              {visibleLevels.map((l) => {
                 const done = levelsCompleted[l.id]?.completed;
                 return (
                   <li key={l.id}>
@@ -374,6 +404,17 @@ function WorldGrid({
                 );
               })}
             </ul>
+            {collapsible ? (
+              <button
+                type="button"
+                className="mt-3 w-full rounded-xl border border-dashed border-[var(--border-subtle)] py-2 text-xs font-semibold text-[var(--accent-primary)] transition hover:bg-[var(--accent-primary)]/10"
+                onClick={() =>
+                  setExpandedWorlds((prev) => ({ ...prev, [w.id]: !expanded }))
+                }
+              >
+                {expanded ? 'Show fewer levels' : `Show all ${w.levels.length} levels (${hiddenCount} hidden)`}
+              </button>
+            ) : null}
           </motion.div>
         );
       })}

@@ -56,8 +56,8 @@ export function SqlResultsDialog({ open, onClose, result }: Props) {
                 Close
               </button>
             </header>
-            <div className="min-h-0 flex-1 overflow-auto p-4">
-              <ResultsTable result={result} maxHeight={560} />
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-4">
+              <ResultsTable result={result} maxHeight={540} />
             </div>
             </motion.div>
           </motion.div>

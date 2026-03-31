@@ -31,34 +31,49 @@ export function MasterclassCurriculum() {
   const [tab, setTab] = useState<Tab>('visuals');
 
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-[var(--bg-primary)]">
-      <header className="shrink-0 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-4 py-5 pl-16 md:pl-20">
-        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[var(--accent-primary)]">Masterclass</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
-          SQL & MongoDB — full reference path
+    <div className="relative flex h-full flex-col overflow-hidden bg-transparent">
+      <div
+        className="pointer-events-none absolute left-1/4 top-0 h-48 w-48 -translate-x-1/2 rounded-full opacity-15 blur-[90px]"
+        style={{ background: 'var(--accent-warning)' }}
+        aria-hidden
+      />
+      <header className="qf-glass relative shrink-0 border-b border-[var(--border-subtle)] px-4 py-6 pl-16 md:pl-20">
+        <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-[var(--accent-secondary)]">
+          Masterclass
+        </p>
+        <h1 className="qf-display mt-2 text-2xl font-extrabold tracking-tight text-[var(--text-primary)] md:text-4xl">
+          <span className="qf-shimmer-title bg-gradient-to-r from-[var(--text-primary)] via-[var(--accent-primary)] to-[var(--accent-info)] bg-clip-text text-transparent">
+            SQL & Mongo — full reference path
+          </span>
         </h1>
-        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)]">
+        <p className="mt-3 max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)] md:text-base">
           Start in Visual lab for narrated animations tied to wiki articles, then use Syllabus as a checklist, and
           Datasets for large practice in
           Workspace. The wiki (sidebar) now holds long-form topics — this page connects motion + story to those pages.
         </p>
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-5 flex flex-wrap gap-2">
           <Link
             to="/learn/wiki"
-            className="rounded-xl bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white hover:opacity-95"
+            className="rounded-xl bg-gradient-to-r from-[var(--accent-primary)] to-[#5b4dff] px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-[var(--accent-primary)]/25 hover:brightness-110"
           >
             Open wiki (deep topics)
           </Link>
           <Link
             to="/workspace"
-            className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-primary)]"
+            className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/80 px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--glass-highlight)]"
           >
             Workspace
           </Link>
-          <Link to="/learn" className="rounded-xl border border-[var(--border-subtle)] px-4 py-2 text-sm hover:bg-[var(--bg-tertiary)]">
+          <Link
+            to="/learn"
+            className="rounded-xl border border-[var(--border-subtle)] px-4 py-2.5 text-sm font-semibold hover:bg-[var(--glass-highlight)]"
+          >
             SQL challenges
           </Link>
-          <Link to="/learn/mongo" className="rounded-xl border border-[var(--border-subtle)] px-4 py-2 text-sm hover:bg-[var(--bg-tertiary)]">
+          <Link
+            to="/learn/mongo"
+            className="rounded-xl border border-[var(--border-subtle)] px-4 py-2.5 text-sm font-semibold hover:bg-[var(--glass-highlight)]"
+          >
             Mongo challenges
           </Link>
         </div>

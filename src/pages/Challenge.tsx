@@ -345,7 +345,7 @@ function ChallengeSession({ levelId }: { levelId: string }) {
               </div>
             </div>
 
-            <div className="qf-glass flex min-h-[200px] shrink-0 flex-col gap-2 rounded-2xl p-3 lg:min-h-[240px]">
+            <div className="qf-glass flex min-h-[200px] min-w-0 shrink-0 flex-col gap-2 rounded-2xl p-3 lg:min-h-[240px]">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--accent-primary)]">
                   Inline results

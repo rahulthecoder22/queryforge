@@ -307,7 +307,7 @@ LIMIT 20;`);
             </div>
           </div>
 
-          <div className="qf-glass shrink-0 rounded-xl p-3">
+          <div className="qf-glass min-h-0 min-w-0 shrink-0 rounded-xl p-3">
             <div className="mb-2 flex gap-2 border-b border-[var(--border-subtle)] text-sm">
               <button
                 type="button"

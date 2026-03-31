@@ -43,13 +43,20 @@ export function DocumentLab() {
   const displayRows = rows.ok ? rows.matched : [];
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
-      <header className="shrink-0 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-4 py-3 pl-16">
-        <Link to="/" className="text-xs text-[var(--accent-info)] hover:underline">
+    <div className="flex h-full flex-col overflow-hidden bg-transparent">
+      <header className="qf-glass shrink-0 border-b border-[var(--border-subtle)] px-4 py-4 pl-16">
+        <Link to="/" className="text-xs font-medium text-[var(--accent-info)] hover:underline">
           ← Dashboard
         </Link>
-        <h1 className="text-lg font-semibold text-[var(--text-primary)]">Document lab</h1>
-        <p className="text-xs text-[var(--text-muted)]">
+        <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--accent-secondary)]">
+          Document store
+        </p>
+        <h1 className="qf-display text-xl font-extrabold text-[var(--text-primary)] md:text-2xl">
+          <span className="bg-gradient-to-r from-[var(--text-primary)] to-[var(--accent-info)] bg-clip-text text-transparent">
+            Document lab
+          </span>
+        </h1>
+        <p className="mt-1 text-xs text-[var(--text-muted)]">
           Mongo-style filters on local JSON — pairs with SQL in the workspace. No cloud yet.
         </p>
       </header>

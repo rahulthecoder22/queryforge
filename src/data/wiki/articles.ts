@@ -3,6 +3,7 @@ import { WIKI_CORE } from './articlesCore';
 import { WIKI_SQL } from './articlesSql';
 import { WIKI_MONGO } from './articlesMongo';
 import { WIKI_CONCEPTS } from './articlesConcepts';
+import { WIKI_CONCEPT_DECK } from './articlesConceptDeck.generated';
 
 export type { WikiArticle, WikiSection, WikiCategory } from './types';
 
@@ -12,6 +13,7 @@ const merged: WikiArticle[] = [
   ...WIKI_MONGO,
   ...WIKI_CONCEPTS,
   ...WIKI_CORE,
+  ...WIKI_CONCEPT_DECK,
 ];
 
 const seen = new Set<string>();

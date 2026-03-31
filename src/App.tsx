@@ -1,15 +1,21 @@
+import { lazy, Suspense } from 'react';
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AppShell } from '@/layouts/AppShell';
 import { Dashboard } from '@/pages/Dashboard';
 import { Workspace } from '@/pages/Workspace';
 import { CourseMap } from '@/pages/CourseMap';
-import { Challenge } from '@/pages/Challenge';
+import { LearnSqlLoading } from '@/components/learn/LearnSqlLoading';
 import { Settings } from '@/pages/Settings';
 import { DocumentLab } from '@/pages/DocumentLab';
 import { MongoCourseMap } from '@/pages/MongoCourseMap';
 import { MongoChallenge } from '@/pages/MongoChallenge';
 import { MasterclassCurriculum } from '@/pages/MasterclassCurriculum';
 import { DatabaseWiki } from '@/pages/DatabaseWiki';
+
+const Challenge = lazy(async () => {
+  const m = await import('@/pages/Challenge');
+  return { default: m.Challenge };
+});
 
 export default function App() {
   return (
@@ -24,7 +30,14 @@ export default function App() {
           <Route path="masterclass" element={<MasterclassCurriculum />} />
           <Route path="learn/wiki" element={<DatabaseWiki />} />
           <Route path="learn" element={<CourseMap />} />
-          <Route path="learn/:levelId" element={<Challenge />} />
+          <Route
+            path="learn/:levelId"
+            element={
+              <Suspense fallback={<LearnSqlLoading />}>
+                <Challenge />
+              </Suspense>
+            }
+          />
           <Route path="settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

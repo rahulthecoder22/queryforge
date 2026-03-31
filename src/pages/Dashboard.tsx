@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useCourseStore } from '@/stores/courseStore';
-import { worlds } from '@/data/courses';
+import { loadSqlWorlds } from '@/data/courses/loadSqlWorlds';
+import type { World } from '@/data/courses/types';
 import { mongoWorlds } from '@/data/mongoCourse/mongoWorlds';
 import {
   ACHIEVEMENTS,
@@ -13,37 +15,55 @@ export function Dashboard() {
   const totalXP = useCourseStore((s) => s.totalXP);
   const levelsCompleted = useCourseStore((s) => s.levelsCompleted);
   const stats = useCourseStore((s) => s.stats);
+  const [sqlWorlds, setSqlWorlds] = useState<World[] | null>(null);
+
+  useEffect(() => {
+    void loadSqlWorlds().then(setSqlWorlds);
+  }, []);
 
   const done = Object.values(levelsCompleted).filter((l) => l.completed).length;
-  const sqlLevels = worlds.reduce((n, w) => n + w.levels.length, 0);
+  const sqlLevels = sqlWorlds?.reduce((n, w) => n + w.levels.length, 0) ?? null;
   const mongoLevels = mongoWorlds.reduce((n, w) => n + w.levels.length, 0);
-  const totalLevels = sqlLevels + mongoLevels;
+  const totalLevels = (sqlLevels ?? 0) + mongoLevels;
   const rank = rankForXp(totalXP);
   const unlocked = unlockedAchievementIds({
     totalXP,
     stats,
     levelsCompleted,
-    worlds,
+    worlds: sqlWorlds ?? [],
   });
 
   return (
-    <div className="h-full overflow-auto p-8">
+    <div className="relative h-full overflow-auto bg-transparent p-6 md:p-8">
+      <div
+        className="pointer-events-none absolute -left-20 top-20 h-64 w-64 rounded-full opacity-25 blur-[90px]"
+        style={{ background: 'var(--accent-primary)' }}
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute bottom-20 right-0 h-56 w-56 rounded-full opacity-20 blur-[80px]"
+        style={{ background: 'var(--accent-secondary)' }}
+        aria-hidden
+      />
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mx-auto max-w-3xl"
+        className="relative mx-auto max-w-3xl"
       >
-        <h1 className="qf-display text-3xl font-bold tracking-tight text-[var(--text-primary)] md:text-4xl">
+        <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-[var(--accent-secondary)]">
+          Your command center
+        </p>
+        <h1 className="qf-display text-3xl font-extrabold tracking-tight text-[var(--text-primary)] md:text-5xl">
           <span className="qf-shimmer-title bg-gradient-to-r from-[var(--text-primary)] via-[var(--accent-secondary)] to-[var(--accent-primary)] bg-clip-text text-transparent">
             Welcome back
           </span>
         </h1>
-        <p className="mt-2 text-[var(--text-secondary)]">
+        <p className="mt-3 text-sm leading-relaxed text-[var(--text-secondary)] md:text-base">
           SQL workspace, document filters, and a leveled course — progress stays on this device (and
           syncs to the cloud when you ship a Pro tier).
         </p>
 
-        <div className="qf-glass mt-5 rounded-2xl p-4">
+        <div className="qf-glass mt-6 rounded-2xl p-5">
           <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
             Suggested path
           </p>
@@ -69,7 +89,7 @@ export function Dashboard() {
           </p>
         </div>
 
-        <div className="mt-6 rounded-2xl border border-[var(--accent-primary)]/25 bg-gradient-to-br from-[var(--accent-primary)]/10 to-transparent p-5">
+        <div className="mt-6 rounded-2xl border border-[var(--accent-primary)]/30 bg-gradient-to-br from-[var(--accent-primary)]/14 via-transparent to-[var(--accent-secondary)]/10 p-6 shadow-lg shadow-[var(--accent-primary)]/10">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-[var(--accent-primary)]">
@@ -112,9 +132,13 @@ export function Dashboard() {
             },
             {
               label: 'Levels',
-              value: `${done}/${totalLevels}`,
+              value:
+                sqlLevels == null ? '…' : `${done}/${totalLevels}`,
               valueClass: 'text-[var(--accent-success)]',
-              sub: `SQL ${sqlLevels} + Mongo ${mongoLevels}`,
+              sub:
+                sqlLevels == null
+                  ? 'Loading course catalog…'
+                  : `SQL ${sqlLevels} + Mongo ${mongoLevels}`,
             },
             {
               label: 'Streak',

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { NavLink } from 'react-router-dom';
+import { loadSqlWorlds } from '@/data/courses/loadSqlWorlds';
 
 const items: { to: string; end?: boolean; label: string; icon: string }[] = [
   { to: '/', end: true, label: 'Dashboard', icon: '◆' },
@@ -46,7 +47,14 @@ export function Sidebar() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.04 * i, type: 'spring', stiffness: 380, damping: 28 }}
           >
-            <NavLink to={item.to} end={item.end} className={linkClass}>
+            <NavLink
+              to={item.to}
+              end={item.end}
+              className={linkClass}
+              onMouseEnter={() => {
+                if (item.to === '/learn') void loadSqlWorlds();
+              }}
+            >
               {({ isActive }) => (
                 <>
                   {isActive ? (
