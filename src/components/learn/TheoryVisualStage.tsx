@@ -1,24 +1,23 @@
 import { motion } from 'framer-motion';
 import type { TheoryVisualId } from '@/data/lessonTheory/types';
 
-type Props = { id: TheoryVisualId; accent?: string };
+type Props = { id: TheoryVisualId; accent?: string; compact?: boolean };
 
-/** Compact animated mental models for the theory column. */
-export function TheoryVisualStage({ id, accent = 'var(--accent-primary)' }: Props) {
+/** Compact mental models for the theory column (animations kept subtle for fast UI). */
+export function TheoryVisualStage({ id, accent = 'var(--accent-primary)', compact = false }: Props) {
   if (id === 'none') return null;
 
   return (
     <div
-      className="relative overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/80 p-4"
+      className={`relative overflow-hidden border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/60 ${compact ? 'rounded-lg px-3 py-2' : 'rounded-xl p-4'}`}
       aria-hidden
     >
-      <div className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)]">
-        Interactive model
-      </div>
-      <p className="mb-3 text-[10px] text-[var(--text-muted)]">
-        Motion hints at data flow. For full explanations open Masterclass → Visual lab or the Wiki.
-      </p>
-      <div className="min-h-[120px]">
+      {!compact ? (
+        <div className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)]">
+          Mental model
+        </div>
+      ) : null}
+      <div className={compact ? 'min-h-[72px]' : 'min-h-[100px]'}>
         {id === 'mongo-boolean' && <VisBoolean accent={accent} />}
         {id === 'mongo-string-eq' && <VisStringEq accent={accent} />}
         {id === 'mongo-in-array' && <VisInArray accent={accent} />}
@@ -267,20 +266,28 @@ function VisSqlJoin({ accent }: { accent: string }) {
 }
 
 function VisSqlGroup({ accent }: { accent: string }) {
+  const buckets = [
+    { label: 'ship 1', n: 3 },
+    { label: 'ship 2', n: 8 },
+    { label: 'ship 3', n: 2 },
+  ];
   return (
-    <div className="flex justify-center gap-2 font-mono text-[10px]">
-      {['a', 'b', 'c'].map((g, i) => (
-        <motion.div
-          key={g}
-          className="rounded px-2 py-3"
-          style={{ backgroundColor: `${accent}18` }}
-          initial={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: i * 0.1 }}
-        >
-          {g}
-        </motion.div>
-      ))}
+    <div className="flex flex-col gap-2 font-mono text-[10px]">
+      <div className="text-center text-[var(--text-muted)]">Rows bucketed by GROUP BY key → aggregates per bucket</div>
+      <div className="flex flex-wrap justify-center gap-2">
+        {buckets.map((b) => (
+          <div
+            key={b.label}
+            className="flex min-w-[4.5rem] flex-col items-center rounded-md border border-[var(--border-subtle)] px-2 py-1.5"
+            style={{ borderTopColor: accent, borderTopWidth: 2 }}
+          >
+            <span className="text-[var(--text-secondary)]">{b.label}</span>
+            <span className="text-xs font-semibold tabular-nums" style={{ color: accent }}>
+              {b.n} rows
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

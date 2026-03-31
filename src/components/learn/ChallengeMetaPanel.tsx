@@ -18,11 +18,11 @@ export function ChallengeMetaPanel({ difficulty, constraints, solveGuide, varian
   if (!difficulty && (!constraints || constraints.length === 0) && !solveGuide) return null;
 
   return (
-    <section className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4">
+    <section className="border-t border-[var(--border-subtle)] pt-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-            {variant === 'mongo' ? 'Problem pack' : 'Interview-style problem'}
+          <span className="text-[10px] font-medium uppercase tracking-wider text-[var(--text-muted)]">
+            {variant === 'mongo' ? 'Problem pack' : 'Constraints'}
           </span>
           {difficulty ? (
             <span
@@ -43,15 +43,18 @@ export function ChallengeMetaPanel({ difficulty, constraints, solveGuide, varian
         ) : null}
       </div>
       {constraints && constraints.length > 0 ? (
-        <ul className="mt-3 list-inside list-disc space-y-1 text-xs text-[var(--text-secondary)]">
+        <ul className="mt-2 space-y-1.5 text-xs leading-relaxed text-[var(--text-secondary)]">
           {constraints.map((c) => (
-            <li key={c}>{c}</li>
+            <li key={c} className="flex gap-2">
+              <span className="text-[var(--text-muted)]">—</span>
+              <span>{c}</span>
+            </li>
           ))}
         </ul>
       ) : null}
       {solveGuide && open ? (
-        <div className="mt-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] p-3 text-xs leading-relaxed text-[var(--text-secondary)]">
-          <p className="font-medium text-[var(--text-primary)]">If you are stuck</p>
+        <div className="mt-3 border-l-2 border-[var(--accent-info)]/50 bg-[var(--bg-tertiary)]/50 px-3 py-2 text-xs leading-relaxed text-[var(--text-secondary)]">
+          <p className="font-medium text-[var(--text-primary)]">Thinking frame</p>
           <p className="mt-2 whitespace-pre-wrap">{solveGuide}</p>
         </div>
       ) : null}

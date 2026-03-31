@@ -234,7 +234,7 @@ function ChallengeSession({ levelId }: { levelId: string }) {
                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
             }`}
           >
-            {tab === 'learn' ? 'Theory' : 'SQL lab'}
+            {tab === 'learn' ? 'Guide' : 'SQL lab'}
           </button>
         ))}
       </div>
@@ -277,17 +277,17 @@ function ChallengeSession({ levelId }: { levelId: string }) {
                 constraints={level.constraints}
                 solveGuide={level.solveGuide}
               />
-              <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/80 p-3 text-xs text-[var(--text-muted)]">
-                Tables in play:{' '}
-                <span className="font-mono text-[var(--text-primary)]">{level.relevantTables.join(', ')}</span>
-              </div>
+              <p className="text-[11px] text-[var(--text-muted)]">
+                Tables:{' '}
+                <span className="font-mono text-[var(--text-secondary)]">{level.relevantTables.join(', ')}</span>
+              </p>
             </LessonLearnPanel>
           </div>
 
           <div
             className={`flex min-h-0 flex-col gap-3 md:col-span-7 ${mobileTab !== 'workspace' ? 'hidden md:flex' : ''}`}
           >
-            <div className="flex min-h-[200px] flex-1 flex-col rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-3 ring-1 ring-white/5">
+            <div className="flex min-h-[200px] flex-1 flex-col rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-3">
               <SQLEditor value={sql} onChange={setSql} onRun={() => void run()} theme={editorTheme} />
               <div className="mt-2 flex flex-wrap gap-2">
                 <button
@@ -315,7 +315,7 @@ function ChallengeSession({ levelId }: { levelId: string }) {
               </div>
             </div>
 
-            <div className="flex min-h-[200px] shrink-0 flex-col gap-2 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-3 lg:min-h-[240px]">
+            <div className="flex min-h-[200px] shrink-0 flex-col gap-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-3 lg:min-h-[240px]">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-semibold uppercase text-[var(--text-muted)]">Inline results</span>
                 <button

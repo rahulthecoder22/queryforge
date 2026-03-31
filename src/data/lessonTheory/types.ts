@@ -25,10 +25,22 @@ export interface LessonTheorySection {
   codeExample?: string;
 }
 
+/** One step in a numbered lesson guide (concept → example → your turn). */
+export interface LessonTheoryStep {
+  title: string;
+  body: string;
+  /** Optional SQL snippet illustrating the idea (not always the final answer). */
+  sql?: string;
+}
+
 export interface LessonTheory {
   /** Short label above the title, e.g. “Before you type”. */
   eyebrow?: string;
   title?: string;
+  /** One line: what success looks like for this challenge. */
+  goal?: string;
+  /** Prefer this over flat sections when you want a clear step-by-step path. */
+  steps?: LessonTheoryStep[];
   sections: LessonTheorySection[];
   visualId?: TheoryVisualId;
   /** Quick mental checklist after reading theory. */
