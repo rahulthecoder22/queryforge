@@ -11,6 +11,7 @@ import { MongoCourseMap } from '@/pages/MongoCourseMap';
 import { MongoChallenge } from '@/pages/MongoChallenge';
 import { MasterclassCurriculum } from '@/pages/MasterclassCurriculum';
 import { DatabaseWiki } from '@/pages/DatabaseWiki';
+import { InterviewGuide } from '@/pages/InterviewGuide';
 
 const Challenge = lazy(async () => {
   const m = await import('@/pages/Challenge');
@@ -29,6 +30,7 @@ export default function App() {
           <Route path="learn/mongo" element={<MongoCourseMap />} />
           <Route path="masterclass" element={<MasterclassCurriculum />} />
           <Route path="learn/wiki" element={<DatabaseWiki />} />
+          <Route path="interview-guide" element={<InterviewGuide />} />
           <Route path="learn" element={<CourseMap />} />
           <Route
             path="learn/:levelId"

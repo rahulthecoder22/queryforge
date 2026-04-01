@@ -358,6 +358,9 @@ export function Dashboard() {
             <Link to="/learn?t=bank" className="text-[var(--accent-primary)] hover:underline">
               Interview bank
             </Link>
+            <Link to="/interview-guide" className="text-[var(--accent-primary)] hover:underline">
+              Interview guide
+            </Link>
             <Link to="/settings" className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
               Settings
             </Link>

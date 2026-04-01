@@ -1,0 +1,17 @@
+{
+  "topics": [
+    {
+      "id": "fundamentals",
+      "category": "SQL fundamentals",
+      "description": "Merged with the app’s built-in guide when ids match.",
+      "items": [
+        {
+          "id": "remote-sample-star",
+          "question": "(Remote sample) When is SELECT * acceptable?",
+          "answer": "In quick exploration, small prototypes, or when you truly need every column and accept schema churn. For app queries and APIs, list columns explicitly.",
+          "tags": ["style", "remote"]
+        }
+      ]
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { NavLink } from 'react-router-dom';
+import { QueryForgeLogo } from '@/components/brand/QueryForgeLogo';
 import { loadSqlWorlds } from '@/data/courses/loadSqlWorlds';
 
 const items: { to: string; end?: boolean; label: string; icon: string }[] = [
@@ -7,6 +8,7 @@ const items: { to: string; end?: boolean; label: string; icon: string }[] = [
   { to: '/workspace', label: 'Workspace', icon: '▣' },
   { to: '/documents', label: 'Documents', icon: '{}' },
   { to: '/learn', label: 'Learn SQL', icon: '◎' },
+  { to: '/interview-guide', label: 'Interview guide', icon: '💼' },
   { to: '/learn/mongo', label: 'Learn Mongo', icon: '🍃' },
   { to: '/learn/wiki', label: 'Wiki', icon: '📚' },
   { to: '/masterclass', label: 'Masterclass', icon: '◇' },
@@ -29,13 +31,16 @@ export function Sidebar() {
       className="qf-glass flex w-56 shrink-0 flex-col border-r border-[var(--border-subtle)] p-3"
     >
       <div className="drag mb-8 px-2 pt-10">
-        <div className="qf-display text-xl font-extrabold tracking-tight">
-          <span className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-info)] bg-clip-text text-transparent">
-            Query
-          </span>
-          <span className="text-[var(--text-primary)]">Forge</span>
+        <div className="flex items-center gap-2.5">
+          <QueryForgeLogo size={40} className="shrink-0 drop-shadow-sm" />
+          <div className="qf-display min-w-0 text-xl font-extrabold tracking-tight leading-tight">
+            <span className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-info)] bg-clip-text text-transparent">
+              Query
+            </span>
+            <span className="text-[var(--text-primary)]">Forge</span>
+          </div>
         </div>
-        <p className="mt-1 text-[10px] font-medium uppercase tracking-[0.2em] text-[var(--text-muted)]">
+        <p className="mt-2 text-[10px] font-medium uppercase tracking-[0.2em] text-[var(--text-muted)]">
           Learn · Build · Ship
         </p>
       </div>
