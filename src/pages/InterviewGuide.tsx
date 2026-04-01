@@ -5,6 +5,39 @@ import { motion } from 'framer-motion';
 import { INTERVIEW_GUIDE_TOPICS } from '@/data/interviewGuide/pack';
 import { fetchOptionalRemoteInterviewTopics, mergeInterviewTopics } from '@/lib/interviewGuide/remotePack';
 
+function InterviewAnswerBlocks({ item }: { item: InterviewQA }) {
+  const paras = item.answer.split(/\n\n+/).filter((p) => p.trim().length > 0);
+  return (
+    <div className="mt-6 space-y-4">
+      <div className="space-y-4 text-sm leading-relaxed text-[var(--text-secondary)]">
+        {paras.map((para, i) => (
+          <p key={i} className="whitespace-pre-wrap">
+            {para.trim()}
+          </p>
+        ))}
+      </div>
+      {item.diagram ? (
+        <pre
+          className="overflow-x-auto rounded-xl border border-dashed border-[var(--accent-info)]/45 bg-[var(--bg-secondary)]/90 p-4 font-mono text-[11px] leading-snug text-[var(--accent-info)]"
+          aria-label="Diagram"
+        >
+          {item.diagram.trimEnd()}
+        </pre>
+      ) : null}
+      {item.codeExamples?.map((ex, ci) => (
+        <div key={ci}>
+          {ex.title ? (
+            <p className="mb-2 text-xs font-semibold text-[var(--text-primary)]">{ex.title}</p>
+          ) : null}
+          <pre className="overflow-x-auto rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-editor)] p-4 font-mono text-xs leading-relaxed text-[var(--accent-success)]">
+            {ex.sql.trim()}
+          </pre>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function resolveSelection(
   filtered: InterviewTopic[],
   selectedItemId: string,
@@ -181,11 +214,7 @@ export function InterviewGuide() {
                   ))}
                 </div>
               ) : null}
-              <div className="mt-6 space-y-4 text-sm leading-relaxed text-[var(--text-secondary)]">
-                {item.answer.split(/\n\n+/).map((para, i) => (
-                  <p key={i}>{para}</p>
-                ))}
-              </div>
+              <InterviewAnswerBlocks item={item} />
             </motion.article>
           ) : (
             <p className="text-sm text-[var(--text-muted)]">Select a question from the list.</p>

@@ -9,7 +9,9 @@
           "id": "remote-sample-star",
           "question": "(Remote sample) When is SELECT * acceptable?",
           "answer": "In quick exploration, small prototypes, or when you truly need every column and accept schema churn. For app queries and APIs, list columns explicitly.",
-          "tags": ["style", "remote"]
+          "tags": ["style", "remote"],
+          "diagram": "Remote packs can include\\n  diagram (string)\\nand codeExamples[]",
+          "codeExamples": [{ "title": "Example", "sql": "SELECT id, name FROM users LIMIT 5;" }]
         }
       ]
     }

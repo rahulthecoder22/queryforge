@@ -12,10 +12,24 @@ function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
 }
 
+function isCodeExample(v: unknown): v is { title?: string; sql: string } {
+  if (!isRecord(v)) return false;
+  if (typeof v.sql !== 'string') return false;
+  if (v.title !== undefined && typeof v.title !== 'string') return false;
+  return true;
+}
+
 function isQA(v: unknown): v is InterviewQA {
   if (!isRecord(v)) return false;
   if (typeof v.id !== 'string' || typeof v.question !== 'string' || typeof v.answer !== 'string') return false;
   if (v.tags !== undefined && (!Array.isArray(v.tags) || v.tags.some((t) => typeof t !== 'string'))) return false;
+  if (v.diagram !== undefined && typeof v.diagram !== 'string') return false;
+  if (
+    v.codeExamples !== undefined &&
+    (!Array.isArray(v.codeExamples) || !v.codeExamples.every(isCodeExample))
+  ) {
+    return false;
+  }
   return true;
 }
 

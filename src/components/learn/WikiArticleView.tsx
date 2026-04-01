@@ -82,11 +82,27 @@ export function WikiArticleView({ article, titleById, onOpenArticle }: Props) {
           <section key={sec.id} id={`sec-${article.id}-${sec.id}`} className="scroll-mt-24">
             <h3 className="text-lg font-semibold text-[var(--text-primary)]">{sec.heading}</h3>
             <SectionBody text={sec.body} />
+            {sec.diagram ? (
+              <pre
+                className="mt-4 overflow-x-auto rounded-xl border border-dashed border-[var(--accent-info)]/45 bg-[var(--bg-secondary)]/90 p-4 font-mono text-[11px] leading-snug text-[var(--accent-info)]"
+                aria-label="Diagram"
+              >
+                {sec.diagram.trimEnd()}
+              </pre>
+            ) : null}
             {sec.code ? (
               <pre className="mt-4 overflow-x-auto rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-editor)] p-4 font-mono text-xs leading-relaxed text-[var(--accent-success)]">
                 {sec.code.trim()}
               </pre>
             ) : null}
+            {sec.codeExtra?.map((block, ci) => (
+              <pre
+                key={ci}
+                className="mt-3 overflow-x-auto rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-editor)] p-4 font-mono text-xs leading-relaxed text-[var(--accent-success)]"
+              >
+                {block.trim()}
+              </pre>
+            ))}
           </section>
         ))}
       </div>

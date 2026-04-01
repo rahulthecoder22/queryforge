@@ -1,20 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 import { SqlLearnHub } from '@/components/learn/SqlLearnHub';
 import { LearnSqlLoading } from '@/components/learn/LearnSqlLoading';
-import { loadSqlWorlds } from '@/data/courses/loadSqlWorlds';
-import type { World } from '@/data/courses/types';
+import {
+  getSqlWorldsSnapshot,
+  loadSqlWorlds,
+  subscribeSqlWorldsCatalog,
+} from '@/data/courses/loadSqlWorlds';
 
 export function CourseMap() {
-  const [worlds, setWorlds] = useState<World[] | null>(null);
+  const worlds = useSyncExternalStore(
+    subscribeSqlWorldsCatalog,
+    getSqlWorldsSnapshot,
+    () => null,
+  );
 
   useEffect(() => {
-    let cancelled = false;
-    void loadSqlWorlds().then((w) => {
-      if (!cancelled) setWorlds(w);
-    });
-    return () => {
-      cancelled = true;
-    };
+    void loadSqlWorlds();
   }, []);
 
   if (worlds == null) {

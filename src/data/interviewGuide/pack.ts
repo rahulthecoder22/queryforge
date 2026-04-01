@@ -11,29 +11,90 @@ export const INTERVIEW_GUIDE_TOPICS: InterviewTopic[] = [
         id: 'where-vs-having',
         question: 'What is the difference between WHERE and HAVING?',
         answer:
-          'WHERE filters rows before aggregation. It runs in the query pipeline before GROUP BY, so it cannot reference aggregate expressions like COUNT(*) or SUM(amount).\n\nHAVING filters groups after GROUP BY. Use it when the condition involves an aggregate or when you need to filter on the result of grouping.\n\nExample: “customers with more than 5 orders” needs GROUP BY customer_id HAVING COUNT(*) > 5. A predicate only on raw rows belongs in WHERE.',
+          'WHERE filters rows before aggregation. It runs in the logical pipeline before GROUP BY, so it cannot reference aggregate expressions like COUNT(*) or SUM(amount)—the aggregate does not exist yet.\n\nHAVING filters groups after GROUP BY. It can reference aggregates and grouped columns. Think: WHERE trims input rows; HAVING trims output groups.\n\nInterview pattern: “customers with more than five paid orders” usually means WHERE status = \'paid\' then GROUP BY customer_id HAVING COUNT(*) >= 5. Putting COUNT(*) in WHERE is a syntax error in standard SQL.',
         tags: ['basics', 'aggregation'],
+        diagram: `   rows ──▶ WHERE ──▶ GROUP BY ──▶ HAVING ──▶ SELECT
+              │           │              │
+         raw table    fewer rows    one row / group   only big groups`,
+        codeExamples: [
+          {
+            title: 'Classic pattern',
+            sql: `SELECT customer_id, COUNT(*) AS n
+FROM orders
+WHERE status = 'paid'
+GROUP BY customer_id
+HAVING COUNT(*) >= 5;`,
+          },
+        ],
       },
       {
         id: 'null-behavior',
         question: 'How does NULL behave in comparisons and aggregates?',
         answer:
-          'NULL means “unknown,” not zero or empty string. Any comparison with NULL using =, <>, <, > yields UNKNOWN (treated as false in WHERE), so you need IS NULL / IS NOT NULL.\n\nFor aggregates, SUM/AVG ignore NULL inputs. COUNT(*) counts rows; COUNT(column) counts non-NULL values in that column.\n\nBoolean logic: AND/OR with UNKNOWN follow three-valued logic; be careful with NOT IN when the subquery can return NULL.',
+          'NULL means “unknown,” not zero or empty string. Comparisons with =, <>, <, > involving NULL yield UNKNOWN (three-valued logic). WHERE keeps only TRUE, so UNKNOWN rows disappear—use IS NULL / IS NOT NULL.\n\nAggregates: SUM/AVG ignore NULL inputs. COUNT(*) counts rows; COUNT(col) counts rows where col IS NOT NULL.\n\nNOT IN (subquery) is dangerous when the subquery can return NULL: outer row compares to UNKNOWN for that NULL, and the whole predicate can become UNKNOWN (treated like false in WHERE). Prefer NOT EXISTS.',
         tags: ['null', 'basics'],
+        diagram: `  NULL = NULL  →  UNKNOWN (not TRUE)
+  WHERE treats UNKNOWN like FALSE → row dropped
+
+  COUNT(*)        counts all rows in group
+  COUNT(email)    ignores rows where email IS NULL`,
+        codeExamples: [
+          {
+            title: 'Safe “not in list”',
+            sql: `SELECT c.id
+FROM customers c
+WHERE NOT EXISTS (
+  SELECT 1 FROM blocked_emails b WHERE b.email = c.email
+);`,
+          },
+        ],
       },
       {
         id: 'primary-foreign',
         question: 'Explain primary keys vs foreign keys and why both matter.',
         answer:
-          'A primary key uniquely identifies a row in a table. It should be stable, non-NULL (in practice), and indexed for fast lookups. One primary key per table (possibly composite).\n\nA foreign key enforces that a column’s values exist in the referenced table’s key column(s), preserving referential integrity. It documents relationships and lets the database reject inconsistent inserts/updates/deletes (depending on ON DELETE/UPDATE rules).\n\nTogether they model relations and keep joins trustworthy in production schemas.',
+          'A primary key uniquely identifies a row in a table (often surrogate BIGINT or UUID). It is indexed, usually NOT NULL, and gives other tables a stable pointer.\n\nA foreign key column references a parent key (usually the parent’s primary key). Declaring FK constraints tells the database to reject inserts/updates that would point nowhere, and to optionally cascade deletes/updates.\n\nWithout FKs, joins still run, but orphaned rows silently break reports and ORM assumptions. With FKs, the schema documents the relational model and catches bugs at write time.',
         tags: ['modeling', 'integrity'],
+        diagram: `   customers                 orders
+ ┌──────────────┐          ┌─────────────────┐
+ │ id (PK)      │◀─────────│ customer_id (FK)│
+ │ name         │   1:N    │ order_id (PK)   │
+ └──────────────┘          └─────────────────┘`,
+        codeExamples: [
+          {
+            title: 'SQLite-style declaration (illustrative)',
+            sql: `CREATE TABLE customers (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL
+);
+CREATE TABLE orders (
+  id INTEGER PRIMARY KEY,
+  customer_id INTEGER NOT NULL REFERENCES customers(id),
+  total_cents INTEGER NOT NULL
+);`,
+          },
+        ],
       },
       {
         id: 'select-star',
         question: 'Why do people avoid SELECT * in production queries?',
         answer:
-          'SELECT * returns every column, which couples application code to the physical schema: adding a column changes row shape, payload size, and sometimes index-only plan choices.\n\nExplicit columns make intent clear, reduce network and memory, help covering indexes, and avoid leaking sensitive columns added later.\n\nIn ad-hoc analytics SELECT * is fine; in application SQL, list columns deliberately.',
+          'SELECT * expands to all columns in catalog order. New columns change API contracts, ORM mappings, and CSV exports without a code change. You also pay for wider rows over the network and prevent some covering-index-only plans.\n\nExplicit columns document intent, shrink payloads, and avoid leaking sensitive columns added later. Ad-hoc analytics and quick COUNT(*) FROM t are fine; application queries should list columns.',
         tags: ['performance', 'style'],
+        codeExamples: [
+          {
+            title: 'Prefer',
+            sql: `SELECT id, email, created_at
+FROM users
+WHERE active = 1;`,
+          },
+          {
+            title: 'Scoped star in joins (still be careful)',
+            sql: `SELECT u.id, u.email, p.display_name
+FROM users u
+JOIN profiles p ON p.user_id = u.id;`,
+          },
+        ],
       },
     ],
   },
@@ -46,22 +107,60 @@ export const INTERVIEW_GUIDE_TOPICS: InterviewTopic[] = [
         id: 'join-types',
         question: 'Compare INNER, LEFT, RIGHT, and FULL OUTER JOIN.',
         answer:
-          'INNER JOIN keeps only rows where the join condition matches in both tables.\n\nLEFT JOIN keeps every row from the left table; matching right rows are attached, else right columns are NULL. RIGHT is the mirror image (less common; often rewritten as LEFT).\n\nFULL OUTER JOIN keeps all rows from both sides, NULL-filling the non-matching side.\n\nChoose based on which table drives the result set and whether you need orphan rows from one side.',
+          'INNER JOIN: only rows where the ON predicate matches on both sides.\n\nLEFT JOIN: every row from the left preserved; matching right rows attached, else right-side columns are NULL. RIGHT is mirror image (often rewritten as LEFT for style).\n\nFULL OUTER: all rows from both sides; non-matches NULL-pad the other side. Rare in OLTP, occasional in ETL when reconciling two feeds.\n\nChoose join type from “which table drives cardinality” and whether orphan rows must appear.',
         tags: ['joins'],
+        diagram: `INNER:     A ∩ B          LEFT:  all A  +  matching B (else NULLs)
+   A ●────● B                A ●────● B
+       \__/                    ●──── ○
+`,
+        codeExamples: [
+          {
+            title: 'INNER',
+            sql: `SELECT c.name, o.id
+FROM customers c
+INNER JOIN orders o ON o.customer_id = c.id;`,
+          },
+          {
+            title: 'LEFT + anti-join idiom',
+            sql: `SELECT c.name
+FROM customers c
+LEFT JOIN orders o ON o.customer_id = c.id
+WHERE o.id IS NULL;`,
+          },
+        ],
       },
       {
         id: 'join-vs-subquery',
         question: 'When would you prefer a JOIN over a subquery (or vice versa)?',
         answer:
-          'Modern optimizers often rewrite semantically equivalent JOINs and subqueries to the same plan. Prefer whichever reads clearest to your team.\n\nJOINs shine when you need columns from multiple tables in the result. Correlated subqueries can express “per-row” logic clearly but historically risked N+1-style plans; today depends on the engine.\n\nEXISTS subqueries are idiomatic for existence checks and often optimize well. For large IN lists, JOIN or EXISTS may beat IN (…) depending on the database.',
+          'Optimizers often flatten joins and subqueries to the same plan—clarity matters. Use JOIN when you need columns from both tables in the result. Use EXISTS for existence checks (often clearer than DISTINCT join dedupe). Correlated subqueries can be fine on modern engines but profile on your data.\n\nNOT IN with nullable subquery columns is a foot-gun; NOT EXISTS is the safe pattern.',
         tags: ['joins', 'subqueries'],
+        codeExamples: [
+          {
+            title: 'EXISTS instead of join + DISTINCT',
+            sql: `SELECT p.id
+FROM products p
+WHERE EXISTS (
+  SELECT 1 FROM order_lines ol
+  WHERE ol.product_id = p.id
+);`,
+          },
+        ],
       },
       {
         id: 'union-vs-union-all',
         question: 'What is the difference between UNION and UNION ALL?',
         answer:
-          'UNION combines two result sets and removes duplicate rows (often via sort/hash deduplication), which costs extra work.\n\nUNION ALL concatenates results and keeps duplicates—faster when you know rows are already distinct or duplicates are acceptable.\n\nUse UNION when you need distinct combined rows; default to UNION ALL when semantics allow.',
+          'UNION combines two same-shaped queries and removes duplicate rows (typically sort/hash deduplication)—extra CPU and memory.\n\nUNION ALL concatenates results and keeps duplicates—preferred when sets are disjoint by construction or duplicates are acceptable.\n\nColumn count and types must align; names come from the first branch.',
         tags: ['sets'],
+        codeExamples: [
+          {
+            title: 'UNION ALL append',
+            sql: `SELECT '2025-01' AS month, revenue FROM jan_sales
+UNION ALL
+SELECT '2025-02', revenue FROM feb_sales;`,
+          },
+        ],
       },
     ],
   },
@@ -74,22 +173,58 @@ export const INTERVIEW_GUIDE_TOPICS: InterviewTopic[] = [
         id: 'group-by-rules',
         question: 'What columns can appear in SELECT when you use GROUP BY?',
         answer:
-          'In standard SQL, SELECT non-aggregated columns must appear in GROUP BY (or be functionally dependent on the grouped columns in engines that support it, e.g. MySQL with ONLY_FULL_GROUP_BY off is looser).\n\nOtherwise the engine does not know which row’s value to show for a group. Aggregates like MAX(order_date) are fine.\n\nInterview tip: state the standard rule first, then note dialect differences.',
+          'Standard SQL: every non-aggregated column in SELECT must appear in GROUP BY (or be functionally determined by the grouped columns—e.g. grouping by primary key of a table lets you select other columns of that table).\n\nOtherwise the engine does not know which row inside the group to display. PostgreSQL errors; legacy MySQL might pick an arbitrary row—never rely on that.\n\nAggregates (SUM, MAX, COUNT, ARRAY_AGG, etc.) summarize the whole group and are always allowed.',
         tags: ['group-by', 'sql-standard'],
+        codeExamples: [
+          {
+            title: 'Valid: group by PK of driving table',
+            sql: `SELECT u.id, u.email, COUNT(o.id) AS order_count
+FROM users u
+LEFT JOIN orders o ON o.user_id = u.id
+GROUP BY u.id, u.email;`,
+          },
+        ],
       },
       {
         id: 'running-total',
         question: 'How would you compute a running total of revenue by day?',
         answer:
-          'Use a window function: SUM(revenue) OVER (ORDER BY day ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW).\n\nOn databases without windows, a self-join or correlated subquery on dates can work but is usually slower and harder to read.\n\nMention that frame clauses (ROWS vs RANGE) matter when there are ties on ORDER BY keys.',
+          'Window functions: partition if needed (e.g. per store), order by day, and SUM over a frame that grows with each row. Default frame for aggregates with ORDER BY varies by engine—be explicit with ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW for a cumulative sum.\n\nWithout windows, correlated subqueries or self-joins on dates work but are usually slower and uglier.',
         tags: ['windows', 'analytics'],
+        codeExamples: [
+          {
+            title: 'Cumulative revenue by day (global)',
+            sql: `SELECT day,
+  revenue,
+  SUM(revenue) OVER (
+    ORDER BY day
+    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+  ) AS running_total
+FROM daily_sales;`,
+          },
+        ],
       },
       {
         id: 'dedupe',
         question: 'How do you deduplicate rows keeping the latest row per user?',
         answer:
-          'Common patterns: (1) ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY updated_at DESC) = 1 in a CTE, then filter rn = 1.\n\n(2) DISTINCT ON (user_id) in PostgreSQL with a matching ORDER BY.\n\n(3) Grouped subquery joining back to MAX(updated_at). Prefer window functions for clarity and usually good plans on modern engines.',
+          'ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY updated_at DESC) assigns 1 to the newest row per user; filter WHERE rn = 1 in an outer query or CTE. DISTINCT ON (PostgreSQL) is a compact alternative. A join to MAX(updated_at) per user also works but watch ties—decide whether to keep one or all max timestamps.',
         tags: ['windows', 'dedup'],
+        codeExamples: [
+          {
+            title: 'ROW_NUMBER pattern',
+            sql: `WITH ranked AS (
+  SELECT id, user_id, body, updated_at,
+    ROW_NUMBER() OVER (
+      PARTITION BY user_id ORDER BY updated_at DESC
+    ) AS rn
+  FROM posts
+)
+SELECT id, user_id, body, updated_at
+FROM ranked
+WHERE rn = 1;`,
+          },
+        ],
       },
     ],
   },
@@ -102,22 +237,52 @@ export const INTERVIEW_GUIDE_TOPICS: InterviewTopic[] = [
         id: 'acid',
         question: 'What does ACID mean?',
         answer:
-          'Atomicity: a transaction’s effects are all applied or none (rollback on failure).\n\nConsistency: the database moves from one valid state to another given declared constraints and rules.\n\nIsolation: concurrent transactions don’t observe each other’s partial work beyond what the isolation level allows.\n\nDurability: committed data survives crashes (WAL, replication, etc.).\n\nInterviewers often follow up with isolation levels and anomalies.',
+          'Atomicity: commit applies all writes or none (rollback on failure).\n\nConsistency: committed state satisfies declared constraints (PK, FK, CHECK)—plus application-level invariants you enforce in code.\n\nIsolation: concurrent transactions see each other’s work only according to the isolation level (trade throughput vs anomalies).\n\nDurability: after successful commit, data survives process crash via WAL and replication policies.',
         tags: ['acid', 'theory'],
+        diagram: `  BEGIN ──▶ writes (uncommitted in MVCC)
+                │
+         COMMIT ──▶ durable + visible to others (per isolation rules)
+         ROLLBACK ──▶ undo`,
+        codeExamples: [
+          {
+            title: 'Explicit transaction',
+            sql: `BEGIN;
+UPDATE accounts SET balance = balance - 50 WHERE id = 1;
+UPDATE accounts SET balance = balance + 50 WHERE id = 2;
+COMMIT;`,
+          },
+        ],
       },
       {
         id: 'isolation-levels',
         question: 'Name common isolation anomalies and which levels prevent them.',
         answer:
-          'Dirty read: seeing uncommitted data from another transaction. Non-repeatable read: the same row read twice returns different values. Phantom read: a second scan sees new rows that match a predicate.\n\nREAD UNCOMMITTED allows dirty reads (often avoided). READ COMMITTED prevents dirty reads. REPEATABLE READ prevents non-repeatable reads in many engines (MySQL/InnoDB semantics differ slightly). SERIALIZABLE prevents phantoms in the strict sense.\n\nExact behavior varies by database—name the standard story, then note engine-specific details if asked.',
+          'Dirty read: read another transaction’s uncommitted write. Non-repeatable read: same row read twice gets different committed values. Phantom read: repeated range query returns different row set because of inserts/updates by others.\n\nREAD COMMITTED: no dirty reads; still allows non-repeatable and phantom in many engines. REPEATABLE READ (snapshot): stable reads in one transaction in PostgreSQL; still watch serialization anomalies. SERIALIZABLE: strongest—often implemented with SSI or strict locking; may abort transactions on conflict.',
         tags: ['isolation', 'concurrency'],
+        codeExamples: [
+          {
+            title: 'Serializable snippet (PostgreSQL)',
+            sql: `BEGIN ISOLATION LEVEL SERIALIZABLE;
+SELECT * FROM seats WHERE flight_id = 42 FOR UPDATE;
+-- book seat ...
+COMMIT;`,
+          },
+        ],
       },
       {
         id: 'optimistic-locking',
         question: 'What is optimistic vs pessimistic locking?',
         answer:
-          'Pessimistic locking takes locks up front (SELECT … FOR UPDATE) so other writers wait—good when contention is high and conflicts are likely.\n\nOptimistic concurrency checks a version column or row hash at commit; if changed, retry. Good when conflicts are rare and you want higher throughput without holding locks during user think-time.\n\nORMs often expose both patterns; choose based on contention and UX.',
+          'Pessimistic: lock rows up front (SELECT … FOR UPDATE) so concurrent writers block—good under high contention when conflicts are frequent.\n\nOptimistic: read version column, attempt update with WHERE id = ? AND version = ?; if zero rows affected, someone else won the race—retry. Good when conflicts are rare and you want to avoid long-held locks during user think-time.',
         tags: ['locking', 'patterns'],
+        codeExamples: [
+          {
+            title: 'Optimistic update',
+            sql: `UPDATE inventory
+SET qty = qty - 1, version = version + 1
+WHERE sku = 'ABC' AND version = 7;`,
+          },
+        ],
       },
     ],
   },
@@ -130,22 +295,37 @@ export const INTERVIEW_GUIDE_TOPICS: InterviewTopic[] = [
         id: 'normalization',
         question: 'What is normalization and when might you denormalize?',
         answer:
-          'Normalization reduces redundancy and update anomalies by splitting facts into tables linked by keys (1NF, 2NF, 3NF, BCNF).\n\nDenormalization duplicates data on purpose—often for read-heavy paths, precomputed aggregates, or to avoid joins at scale. It trades write complexity and consistency risk for read latency and simplicity.\n\nMention you measure with workload, SLAs, and maintenance cost.',
+          'Normalization (1NF–BCNF) removes redundancy and update anomalies by splitting facts into tables linked by keys. Each non-key column should depend on the key, the whole key, and nothing but the key.\n\nDenormalization copies or aggregates data for read performance—common in warehouses and read-heavy OLTP slices. You trade simpler/faster reads for harder writes and consistency risk; document invariants and use triggers or batch jobs to keep copies fresh.',
         tags: ['modeling', 'tradeoffs'],
+        diagram: `  Normalized                 Denormalized (example)
+  orders ─┬─ order_lines          order_report_row
+          │   products               (wide flat table)
+          └─ customers`,
       },
       {
         id: 'index-tradeoff',
         question: 'What are the tradeoffs of adding indexes?',
         answer:
-          'Indexes speed up selective reads and some joins/orderings by avoiding full scans. They cost extra storage and slow down writes (insert/update/delete must maintain the index).\n\nToo many overlapping indexes confuse the optimizer and waste resources. Composite index column order matters for equality vs range predicates.\n\nMention covering indexes and that the best index depends on actual query patterns.',
+          'Pros: faster point lookups, selective WHERE, join keys, ORDER BY that matches index order. Covering indexes (INCLUDE columns) can avoid heap access.\n\nCons: more storage; every INSERT/UPDATE/DELETE must maintain each index; too many similar indexes confuse optimizers. Leading column rule: composite (a,b) helps filters on a and on (a,b), not usually on b alone.',
         tags: ['indexing', 'performance'],
+        codeExamples: [
+          {
+            title: 'Composite index',
+            sql: `CREATE INDEX idx_orders_cust_date
+ON orders (customer_id, order_date DESC);`,
+          },
+        ],
       },
       {
         id: 'oltp-vs-olap',
         question: 'How do OLTP and OLAP workloads differ?',
         answer:
-          'OLTP: many short transactions, row-level reads/writes, strong consistency, low latency—think orders, payments, user sessions.\n\nOLAP: analytical scans, aggregations over large history, often columnar stores, batch or interactive BI—think warehouses and metrics.\n\nDesign choices (schema, indexes, hardware, batching) diverge; don’t run heavy reporting directly on a hot OLTP primary without safeguards.',
+          'OLTP: short transactions, row-oriented storage, many small reads/writes, strong consistency on hot keys—payments, inventory, sessions.\n\nOLAP: large scans, aggregations, columnar layouts, batch or interactive BI—metrics, experiments, finance close. Do not run huge reports on a busy primary without replicas, queues, or a warehouse.',
         tags: ['architecture', 'warehousing'],
+        diagram: ` OLTP                    OLAP
+ ┌────┐ many small txs     ┌─────────────┐
+ │ ⚡ │ low latency        │ 📊 big scans │
+ └────┘                    └─────────────┘`,
       },
     ],
   },

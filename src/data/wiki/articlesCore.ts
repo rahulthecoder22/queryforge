@@ -1,10 +1,13 @@
 import type { WikiArticle, WikiSection } from './types';
 
-const s = (id: string, heading: string, body: string, code?: string): WikiSection => ({
+type SectionOpts = { codeExtra?: string[]; diagram?: string };
+
+const s = (id: string, heading: string, body: string, code?: string, opts?: SectionOpts): WikiSection => ({
   id,
   heading,
   body,
   code,
+  ...opts,
 });
 
 /** Foundational articles + visual-lab companion pages. */
@@ -114,7 +117,8 @@ $expr inside $match allows aggregation expressions referencing $$ROOT fields—d
     tags: ['meta', 'study'],
     title: 'How to use this wiki with the courses',
     summary:
-      'Suggested study loops: theory → wiki → challenge → workspace. Articles are written for depth; use search and category chips to narrow.',
+      'Suggested study loops: theory → wiki → challenge → workspace. Long-form SQL articles include multiple code samples and ASCII diagrams (lecture-slide style). The Concept deck offers hundreds of short glossary pages—pair those with deep articles for “flashcard + textbook” learning.',
+    seeAlso: ['sql-course-module-01-relational-model', 'sql-select-from-deep', 'acid-deep'],
     sections: [
       s(
         'path',
@@ -127,14 +131,34 @@ $expr inside $match allows aggregation expressions referencing $$ROOT fields—d
 
 4) Reproduce patterns in Workspace or masterclass datasets at higher volume.
 
-5) For interviews, pair SQL Grind constraints with wiki pages on NULLs, joins, and GROUP BY.`,
+5) For interviews, pair SQL Grind constraints with wiki pages on NULLs, joins, and GROUP BY.
+
+6) For “college course” depth, start with **Course module 1 — Relational model & SQL mapping**, then read SELECT/WHERE/JOIN deep dives—they now include pipeline diagrams and extra SQL listings.`,
       ),
       s(
         'depth',
         'How topics are organized',
         `SQL articles focus on the declarative language and portable patterns; engine-specific sections call out SQLite/QueryForge where relevant. MongoDB articles note where Atlas behavior may differ from the local course matcher.
 
-Concepts articles (ACID, isolation, MVCC) explain why databases behave the way they do under concurrency and failure—essential for senior interviews.`,
+Concepts articles (ACID, isolation, MVCC) explain why databases behave the way they do under concurrency and failure—essential for senior interviews.
+
+**Concept deck** entries are intentionally short—use them for quick recall. **Deep articles** (many sections, diagrams, codeExtra blocks) are the textbook chapters.`,
+      ),
+      s(
+        'diagrams',
+        'How to read ASCII diagrams',
+        `Diagrams use monospace boxes and arrows. They are logical (how SQL thinks), not exact storage layouts. When you see a pipeline (FROM → WHERE → GROUP BY), compare it to EXPLAIN output in the workspace—the physical plan may reorder joins but preserves results.`,
+        undefined,
+        {
+          diagram: `   Wiki article layout
+   ┌────────────────────────────────┐
+   │ Prose (paragraphs + bullets)     │
+   ├────────────────────────────────┤
+   │ Diagram panel (this style)       │
+   ├────────────────────────────────┤
+   │ SQL code block(s)               │
+   └────────────────────────────────┘`,
+        },
       ),
     ],
   },

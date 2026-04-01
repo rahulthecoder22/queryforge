@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AmbientBackdrop } from '@/components/layout/AmbientBackdrop';
 import { Sidebar } from '@/components/shared/Sidebar';
+import { loadSqlWorlds } from '@/data/courses/loadSqlWorlds';
 import { AnimatedOutlet } from '@/layouts/AnimatedOutlet';
 import { getQueryForge } from '@/lib/electron';
 import { emitExplainQuery, emitRunQuery } from '@/lib/workspaceEvents';
@@ -18,6 +19,10 @@ export function AppShell() {
   useEffect(() => {
     void hydrateCourse();
   }, [hydrateCourse]);
+
+  useEffect(() => {
+    void loadSqlWorlds();
+  }, []);
 
   useEffect(() => {
     if (!courseHydrated) return;

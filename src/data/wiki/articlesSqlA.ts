@@ -1,10 +1,13 @@
 import type { WikiArticle, WikiSection } from './types';
 
-const s = (id: string, heading: string, body: string, code?: string): WikiSection => ({
+type SectionOpts = { codeExtra?: string[]; diagram?: string };
+
+const s = (id: string, heading: string, body: string, code?: string, opts?: SectionOpts): WikiSection => ({
   id,
   heading,
   body,
   code,
+  ...opts,
 });
 
 /** SQL encyclopedia articles (part 1 of 2). */
@@ -63,6 +66,80 @@ Column aliases from SELECT are not visible in WHERE in standard SQL (WHERE runs 
 ORDER BY and GROUP BY can reference output aliases in PostgreSQL ORDER BY; GROUP BY may need the expression repeated or use ordinal positions (discouraged for maintainability).`,
         `SELECT first_name || ' ' || last_name AS full_name, age * 12 AS age_months
 FROM residents;`,
+        {
+          codeExtra: [
+            `-- Alias not visible in WHERE (standard SQL): use subquery
+SELECT *
+FROM (
+  SELECT unit_price * qty AS line_total
+  FROM order_lines
+) x
+WHERE x.line_total > 100;`,
+          ],
+        },
+      ),
+      s(
+        'pipeline-diagram',
+        'Logical query pipeline (lecture diagram)',
+        `Think in stages. The physical engine may reorder work, but the logical story helps you predict duplicates, NULLs, and where filters apply. HAVING cannot move before GROUP BY; WHERE cannot reference aggregates.
+
+Below is a schematic “data flow” from a typical lecture slide—arrows show row multiset transformation, not a specific algorithm.`,
+        undefined,
+        {
+          diagram: `   ┌─────────┐    ┌─────────┐    ┌──────────┐    ┌─────────┐    ┌─────────┐
+   │  FROM   │───▶│  WHERE  │───▶│ GROUP BY │───▶│ HAVING  │───▶│ SELECT  │
+   │ + JOIN  │    │ filter  │    │ buckets  │    │ filter  │    │ project │
+   └─────────┘    └─────────┘    └─────────┘    └─────────┘    └─────────┘
+        │               │               │               │               │
+        ▼               ▼               ▼               ▼               ▼
+     row bags        fewer rows      1 row / grp    fewer grps     final cols
+`,
+        },
+      ),
+      s(
+        'derived-table',
+        'Derived tables (subqueries in FROM)',
+        `A parenthesized SELECT in FROM is a derived table. It must have an alias in standard SQL. Use them to stage complex expressions, pre-aggregate before joining, or enforce “filter before join” when the optimizer needs a hint.
+
+Correlated derived tables are uncommon; prefer LATERAL (PostgreSQL) or APPLY (SQL Server) when each outer row should drive an inner subquery.`,
+        `SELECT d.name, s.total_spent
+FROM customers d
+JOIN (
+  SELECT customer_id, SUM(amount) AS total_spent
+  FROM orders
+  WHERE status = 'paid'
+  GROUP BY customer_id
+) s ON s.customer_id = d.id;`,
+        {
+          diagram: `customers                    orders (paid only)
+┌────┬──────┐                 ┌─────────────┬────────┐
+│ id │ name │                 │ customer_id │ amount │
+├────┼──────┤                 ├─────────────┼────────┤
+│ 1  │ Ada  │                 │ 1           │ 40     │
+│ 2  │ Bob  │                 │ 1           │ 60     │
+└────┴──────┘                 │ 2           │ 25     │
+       │                      └─────────────┴────────┘
+       │                              │
+       └────────── JOIN ──────────────┘
+              ON d.id = s.customer_id`,
+        },
+      ),
+      s(
+        'distinct-worked',
+        'DISTINCT with JOIN (worked mini-example)',
+        `DISTINCT applies after SELECT expressions are evaluated. After a JOIN that fans out (one order, many lines), counting customers by id may need DISTINCT or subquery deduplication.
+
+Below: without DISTINCT you count line rows; with DISTINCT customer_id you count customers who ordered.`,
+        `SELECT COUNT(*) AS row_count_after_join
+FROM orders o
+JOIN order_lines ol ON ol.order_id = o.id;`,
+        {
+          codeExtra: [
+            `SELECT COUNT(DISTINCT o.customer_id) AS customers_with_lines
+FROM orders o
+JOIN order_lines ol ON ol.order_id = o.id;`,
+          ],
+        },
       ),
     ],
   },
@@ -123,6 +200,20 @@ OR across different columns often defeats single-index use unless the planner us
         `Predicates comparing NULL with =, <>, <, > yield UNKNOWN except IS NULL/IS NOT NULL. WHERE treats UNKNOWN like FALSE. CHECK constraints treat UNKNOWN like pass (row allowed)—a subtle difference: a failing CHECK must be explicitly FALSE.
 
 AND/OR truth tables: TRUE AND UNKNOWN → UNKNOWN; FALSE AND UNKNOWN → FALSE; TRUE OR UNKNOWN → TRUE; FALSE OR UNKNOWN → UNKNOWN.`,
+        undefined,
+        {
+          diagram: `Three-valued AND (p AND q)          Three-valued OR (p OR q)
+┌─────┬────┬────┬────┐                ┌─────┬────┬────┬────┐
+│  p  │ T  │ F  │ U  │                │  p  │ T  │ F  │ U  │
+├─────┼────┼────┼────┤                ├─────┼────┼────┼────┤
+│ T   │ T  │ F  │ U  │                │ T   │ T  │ T  │ T  │
+│ F   │ F  │ F  │ F  │                │ F   │ T  │ F  │ U  │
+│ U   │ U  │ F  │ U  │                │ U   │ T  │ U  │ U  │
+└─────┴────┴────┴────┘                └─────┴────┴────┴────┘
+  T=TRUE  F=FALSE  U=UNKNOWN
+
+WHERE keeps row only if predicate = TRUE (F and U both drop the row).`,
+        },
       ),
       s(
         'is-null',
@@ -164,6 +255,25 @@ Use COALESCE(expr, 0) when you want NULL to behave as zero in arithmetic—but d
         `Most joins are equi-joins: ON a.key = b.key. Composite keys AND together: ON a.k1 = b.k1 AND a.k2 = b.k2. Natural JOIN (rare in production) joins same-named columns—dangerous when names collide accidentally.
 
 Foreign keys declare intent but enforcement is separate; join correctness is still your query’s responsibility.`,
+        `SELECT c.id, c.name, o.id AS order_id, o.total
+FROM customers c
+INNER JOIN orders o ON o.customer_id = c.id;`,
+        {
+          diagram: `        INNER JOIN (intersection only)
+    ┌─────────────── Customers ───────────────┐
+    │  ● Ada   ● Bob   ○ Chen (no orders)   │
+    └──────────────────┬────────────────────┘
+                       │  matched pairs
+    ┌──────────────────▼────────────────────┐
+    │            Orders (paid)                │
+    │  ● order→Ada   ● order→Bob             │
+    └─────────────────────────────────────────┘
+
+        LEFT JOIN (all customers, null-safe right)
+    Ada──▶ row + order cols
+    Bob──▶ row + order cols
+    Chen─▶ row + NULLs for order columns`,
+        },
       ),
       s(
         'on',
@@ -182,6 +292,25 @@ Semi-join EXISTS can replace join+distinct when you only need existence.`,
 FROM orders o
 JOIN customers c ON o.customer_id = c.id
 WHERE o.status = 'paid';`,
+        {
+          codeExtra: [
+            `-- One row per customer: aggregate BEFORE join
+SELECT c.name, s.last_order_date
+FROM customers c
+JOIN (
+  SELECT customer_id, MAX(order_date) AS last_order_date
+  FROM orders
+  GROUP BY customer_id
+) s ON s.customer_id = c.id;`,
+            `-- Semi-join: “customers who ever paid” without duplicating customers
+SELECT c.name
+FROM customers c
+WHERE EXISTS (
+  SELECT 1 FROM orders o
+  WHERE o.customer_id = c.id AND o.status = 'paid'
+);`,
+          ],
+        },
       ),
       s(
         'non-equi',
@@ -358,6 +487,65 @@ HAVING COUNT(*) >= 2;`,
         'NULL in GROUP BY',
         `All NULL keys bucket together—one group. DISTINCT and GROUP BY treat NULL consistently within an engine.`,
       ),
+      s(
+        'bucket-diagram',
+        'Visual: rows → buckets → one output row each',
+        `Each distinct tuple of GROUP BY expressions defines a bucket. Aggregates scan all rows in the bucket. If you GROUP BY store_id, product_id you get one result row per (store, product) pair.
+
+Fan-in warning: grouping keys that are too fine (including a high-cardinality timestamp) explode row count—often you want DATE(order_ts) or trunc to hour.`,
+        undefined,
+        {
+          diagram: `  Raw order_lines                After GROUP BY product_id
+┌────────┬─────────┬──────┐        ┌───────────┬────────────┐
+│ prod A │  qty 2  │ $10  │        │ product_id│ SUM(qty)   │
+│ prod A │  qty 1  │ $10  │   ──▶  ├───────────┼────────────┤
+│ prod B │  qty 4  │ $20  │        │ A         │ 3          │
+└────────┴─────────┴──────┘        │ B         │ 4          │
+                                   └───────────┴────────────┘`,
+        },
+      ),
+      s(
+        'having-worked',
+        'Worked example: “heavy buyers”',
+        `We first remove cancelled rows with WHERE (cheap, uses index on status). Then we group by customer. HAVING keeps only groups with enough paid volume.
+
+Interview tip: say explicitly that WHERE reduces rows before aggregation; HAVING filters after.`,
+        `SELECT customer_id,
+       COUNT(*) AS paid_orders,
+       SUM(amount) AS revenue
+FROM orders
+WHERE status = 'paid'
+GROUP BY customer_id
+HAVING COUNT(*) >= 3 AND SUM(amount) >= 500;`,
+        {
+          codeExtra: [
+            `-- Same intent with subquery (sometimes clearer in huge queries)
+SELECT *
+FROM (
+  SELECT customer_id,
+         COUNT(*) AS paid_orders,
+         SUM(amount) AS revenue
+  FROM orders
+  WHERE status = 'paid'
+  GROUP BY customer_id
+) t
+WHERE paid_orders >= 3 AND revenue >= 500;`,
+          ],
+        },
+      ),
+      s(
+        'rollup-cube',
+        'ROLLUP / CUBE (reporting “subtotals”)',
+        `ROLLUP (a,b) produces grouping sets: (a,b), (a), (). CUBE generates all 2^k combinations. Super-aggregate rows often show NULL in dimension columns—use GROUPING() (PostgreSQL, SQL Server, BigQuery) to tell “real NULL” from “total row.”
+
+SQLite has limited support; warehouses (Snowflake, BigQuery) use these heavily. Know the idea for system-design interviews.`,
+        `-- PostgreSQL-style illustration
+SELECT COALESCE(region, 'ALL regions') AS region,
+       COALESCE(product, 'ALL products') AS product,
+       SUM(sales) AS revenue
+FROM store_sales
+GROUP BY ROLLUP (region, product);`,
+      ),
     ],
   },
   {
@@ -385,6 +573,24 @@ Empty OVER () uses whole table as one partition.`,
         `SELECT order_id, amount,
   SUM(amount) OVER (PARTITION BY customer_id ORDER BY order_date) AS running
 FROM orders;`,
+        {
+          diagram: `  Table rows (same result set size as input)
+  customer │ order_date │ amount │  PARTITION BY customer_id
+  ---------+------------+--------+  ┌─────────────────────────┐
+  Ada      │ 2025-01-01 │ 10     │  partition "Ada"          │
+  Ada      │ 2025-01-05 │ 20     │  running sum: 10 → 30     │
+  Bob      │ 2025-01-02 │ 15     │  ┌─────────────────────────┐
+  Bob      │ 2025-01-07 │  5     │  partition "Bob"          │
+  ---------+------------+--------+  │  running sum: 15 → 20     │
+                                    └─────────────────────────┘`,
+          codeExtra: [
+            `SELECT order_id,
+  amount,
+  ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date) AS seq,
+  LAG(amount, 1, 0) OVER (PARTITION BY customer_id ORDER BY order_date) AS prev_amt
+FROM orders;`,
+          ],
+        },
       ),
       s(
         'ranking',

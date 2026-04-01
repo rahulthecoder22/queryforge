@@ -1,10 +1,13 @@
 import type { WikiArticle, WikiSection } from './types';
 
-const s = (id: string, heading: string, body: string, code?: string): WikiSection => ({
+type SectionOpts = { codeExtra?: string[]; diagram?: string };
+
+const s = (id: string, heading: string, body: string, code?: string, opts?: SectionOpts): WikiSection => ({
   id,
   heading,
   body,
   code,
+  ...opts,
 });
 
 export const WIKI_CONCEPTS: WikiArticle[] = [
@@ -41,6 +44,19 @@ Savepoints let you partially roll back nested work inside one transaction: ROLLB
 Engines implement this with undo information (rollback segments, undo logs) and a two-phase commit story at the storage layer: during execution, new versions may be written but marked uncommitted; on commit, they flip to committed; on abort or crash recovery, uncommitted versions are discarded or rolled back.
 
 Atomicity is not the same as locking. You can be atomic while still allowing other transactions to read old row versions (MVCC). It is also not the same as “one statement only”: a single UPDATE that touches many rows is usually atomic with respect to those rows, but a multi-statement business rule still needs an explicit transaction wrapper if you want all statements to succeed or fail together.`,
+        `BEGIN;
+UPDATE accounts SET balance = balance - 100 WHERE id = 1;
+UPDATE accounts SET balance = balance + 100 WHERE id = 2;
+COMMIT;`,
+        {
+          diagram: `Transfer without atomicity (BAD)          With atomicity (GOOD)
+┌─────────────────────────────┐          ┌─────────────────────────────┐
+│ Crash after debit, no credit│          │ Crash mid-flight            │
+│  Account 1: -100 ✓            │          │  Recovery: UNDO both writes │
+│  Account 2: unchanged ✗       │          │  OR replay COMMIT record    │
+│  Money vanished               │          │  Never half-applied durable │
+└─────────────────────────────┘          └─────────────────────────────┘`,
+        },
       ),
       s(
         'consistency',
@@ -101,6 +117,16 @@ MongoDB offers multi-document transactions on replica sets (4.0+) with ACID sema
 • Read skew: T1 reads two related rows (e.g. two account balances) while T2 transfers money between them and commits; T1 sees a state that never existed together (related to snapshot timing).
 
 • Write skew: Two transactions each read overlapping data and make disjoint writes that are individually valid but globally violate an invariant (classic example: two clinicians both seeing “one doctor on duty” and both going off duty). Preventing write skew typically needs true SERIALIZABLE or explicit constraint/locking patterns, not REPEATABLE READ alone in every engine.`,
+        undefined,
+        {
+          diagram: `Isolation “slider” (conceptual — check your engine’s exact guarantees)
+
+  READ UNCOMMITTED ──▶ READ COMMITTED ──▶ REPEATABLE READ ──▶ SERIALIZABLE
+        │                      │                    │                 │
+   may see uncommitted    no dirty reads      stable snapshot    like serial exec
+        │                      │                    │                 │
+   strongest throughput ◀──────────────────────────────────────▶ fewest anomalies`,
+        },
       ),
       s(
         'sql-levels',

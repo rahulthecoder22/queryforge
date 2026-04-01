@@ -1,10 +1,13 @@
 import type { WikiArticle, WikiSection } from './types';
 
-const s = (id: string, heading: string, body: string, code?: string): WikiSection => ({
+type SectionOpts = { codeExtra?: string[]; diagram?: string };
+
+const s = (id: string, heading: string, body: string, code?: string, opts?: SectionOpts): WikiSection => ({
   id,
   heading,
   body,
   code,
+  ...opts,
 });
 
 /** SQL encyclopedia articles (part 2 of 2). */
@@ -143,6 +146,21 @@ SQLite: enforcement requires PRAGMA foreign_keys=ON per connection.`,
         `Default for many engines. Supports =, range, ORDER BY on leading prefix, MIN/MAX on indexed path. Each index adds write cost on INSERT/UPDATE/DELETE of covered columns.
 
 Composite (a,b,c): usable for predicates on a; a+b; a+b+c—not b alone.`,
+        `CREATE INDEX idx_orders_cust_date ON orders (customer_id, order_date);`,
+        {
+          diagram: `Simplified B-tree index on (customer_id, order_date)
+
+                        [ 10 | 25 | 40 ]   ← root keys (separators)
+                       /    |    |    \\
+              keys <10   10–25 25–40   >40
+                 │        │      │       │
+            leaf pages hold (key → row pointer) in sorted order
+            Range scan: follow leaf chain from first matching key
+
+Composite (cust_id, order_date):
+  WHERE cust_id = 7              → can use index (leading column)
+  WHERE order_date = '2025-01-01' without cust_id → often CANNOT use this index`,
+        },
       ),
       s(
         'covering',
