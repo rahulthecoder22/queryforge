@@ -57,7 +57,10 @@ export function DocumentLab() {
           </span>
         </h1>
         <p className="mt-1 text-xs text-[var(--text-muted)]">
-          Mongo-style filters on local JSON — pairs with SQL in the workspace. No cloud yet.
+          Mongo-style filters on local JSON. No cloud.
+        </p>
+        <p className="mt-2 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+          Flow: JSON filter → Run find → results panel
         </p>
       </header>
 
@@ -68,13 +71,12 @@ export function DocumentLab() {
             animate={{ opacity: 1, y: 0 }}
             className="flex-1 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4"
           >
-            <h2 className="text-sm font-semibold text-[var(--text-primary)]">Filter (JSON)</h2>
+            <h2 className="text-sm font-semibold text-[var(--text-primary)]">1 · Filter (JSON)</h2>
             <p className="mt-1 text-xs text-[var(--text-secondary)]">
-              Uses operators like <code className="text-[var(--accent-warning)]">$gte</code>,{' '}
+              <code className="text-[var(--accent-warning)]">$gte</code>,{' '}
               <code className="text-[var(--accent-warning)]">$in</code>,{' '}
-              <code className="text-[var(--accent-warning)]">$and</code>, dot paths like{' '}
-              <code className="text-[var(--accent-warning)]">meta.office</code>. Empty{' '}
-              <code className="text-[var(--accent-warning)]">{}</code> returns all documents.
+              <code className="text-[var(--accent-warning)]">$and</code>, dot paths —{' '}
+              <code className="text-[var(--accent-warning)]">{}</code> matches all.
             </p>
             <textarea
               value={filterText}
@@ -102,7 +104,7 @@ export function DocumentLab() {
             transition={{ delay: 0.05 }}
             className="flex-1 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4"
           >
-            <h2 className="text-sm font-semibold text-[var(--text-primary)]">Results</h2>
+            <h2 className="text-sm font-semibold text-[var(--text-primary)]">2 · Results</h2>
             <p className="mt-1 text-xs text-[var(--text-muted)]">
               {displayRows.length} document{displayRows.length === 1 ? '' : 's'}
             </p>
@@ -121,11 +123,12 @@ export function DocumentLab() {
         </div>
 
         <div className="mx-auto mt-6 max-w-5xl rounded-xl border border-dashed border-[var(--border-subtle)] bg-[var(--bg-secondary)]/60 p-4 text-xs text-[var(--text-secondary)]">
-          <p className="font-medium text-[var(--text-primary)]">SQL + documents in one product</p>
-          <p className="mt-2">
-            Today this lab is <strong>offline-first</strong> for learning. A subscription tier could add{' '}
-            <strong>Atlas</strong> connections, saved playgrounds, and guided NoSQL worlds alongside the SQL
-            course — same achievements and streaks across both engines.
+          <p>
+            <span className="font-medium text-[var(--text-primary)]">More practice:</span>{' '}
+            <Link to="/learn/mongo" className="text-[var(--accent-info)] hover:underline">
+              Mongo course map
+            </Link>{' '}
+            for graded challenges with hints.
           </p>
         </div>
       </div>

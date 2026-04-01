@@ -272,6 +272,10 @@ LIMIT 20;`);
         </div>
       </header>
 
+      <p className="shrink-0 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]/35 px-4 py-1.5 pl-20 text-[10px] font-medium uppercase tracking-widest text-[var(--text-muted)]">
+        Load or pick DB → editor → Run → Results / Explain
+      </p>
+
       <div className="flex min-h-0 flex-1">
         <div className="qf-glass w-56 shrink-0 overflow-auto border-r border-[var(--border-subtle)]">
           <div className="border-b border-[var(--border-subtle)] px-2 py-2 text-xs font-bold uppercase tracking-widest text-[var(--accent-secondary)]">

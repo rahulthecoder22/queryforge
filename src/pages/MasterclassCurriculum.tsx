@@ -46,10 +46,11 @@ export function MasterclassCurriculum() {
             SQL & Mongo — full reference path
           </span>
         </h1>
-        <p className="mt-3 max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)] md:text-base">
-          Start in Visual lab for narrated animations tied to wiki articles, then use Syllabus as a checklist, and
-          Datasets for large practice in
-          Workspace. The wiki (sidebar) now holds long-form topics — this page connects motion + story to those pages.
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--text-secondary)]">
+          <span className="font-medium text-[var(--text-primary)]">Suggested order:</span>{' '}
+          Visual lab → Syllabus → Datasets (workspace).{' '}
+          <span className="text-[var(--text-muted)]">Long reads: wiki.</span>{' '}
+          <span className="text-[var(--text-muted)]">Switch sections with the tabs below.</span>
         </p>
         <div className="mt-5 flex flex-wrap gap-2">
           <Link

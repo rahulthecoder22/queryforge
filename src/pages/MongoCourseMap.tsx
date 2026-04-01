@@ -37,16 +37,19 @@ export function MongoCourseMap() {
             MongoDB course map
           </span>
         </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--text-secondary)] md:text-base">
-        {mongoWorlds.length} modules, {total} challenges — LeetCode-style JSON filters on local
-        documents (no server). Each problem has constraints, a “how to think” guide, and five
-        progressive hints (canonical answer on the last tier). Jump anywhere; XP still saves.
-      </p>
-      <p className="mt-3 text-sm">
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--text-secondary)]">
+          <span className="font-medium text-[var(--text-primary)]">
+            {mongoWorlds.length} modules, {total} challenges.
+          </span>{' '}
+          JSON filters on local docs — hints tier up to the answer. XP saves if you skip around.
+        </p>
+        <p className="mt-2 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+          Flow: module card → level → refine filter → submit
+        </p>
+      <p className="mt-4 text-sm">
         <Link to="/learn" className="font-medium text-[var(--accent-primary)] hover:underline">
           ← SQL course map
-        </Link>{' '}
-        <span className="text-[var(--text-muted)]">(fundamentals, Grind, windows, industries)</span>
+        </Link>
       </p>
 
         <div className="mt-8 grid gap-4 md:grid-cols-2">

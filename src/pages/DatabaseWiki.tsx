@@ -95,12 +95,12 @@ export function DatabaseWiki() {
             Database wiki
           </span>
         </h1>
-        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)] md:text-base">
-          {WIKI_ARTICLES.length} articles — curated deep dives plus a{' '}
-          <strong className="text-[var(--text-primary)]">500-topic concept deck</strong> for breadth. Search, filter by
-          category, or open the concept deck for quick glossary-style pages tied to SQL, MongoDB, and systems ideas.
+        <p className="mt-2 max-w-xl text-sm leading-relaxed text-[var(--text-secondary)]">
+          <span className="font-medium text-[var(--text-primary)]">{WIKI_ARTICLES.length} articles.</span> Left: search
+          or chip filters → right: the article (desktop).{' '}
+          <strong className="text-[var(--text-primary)]">Concept deck</strong> is 500 short glossary pages.
         </p>
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-5 flex flex-wrap gap-2">
           <Link
             to="/masterclass"
             className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/60 px-4 py-2 text-xs font-semibold text-[var(--text-primary)] transition hover:bg-[var(--glass-highlight)]"
@@ -129,16 +129,19 @@ export function DatabaseWiki() {
       </header>
 
       <div className="relative flex min-h-0 flex-1 flex-col lg:flex-row">
-        <aside className="qf-glass flex max-h-[38vh] shrink-0 flex-col border-b border-[var(--border-subtle)] lg:max-h-none lg:w-[min(100%,320px)] lg:border-b-0 lg:border-r xl:w-96">
+        <aside className="qf-glass flex max-h-[40vh] shrink-0 flex-col border-b border-[var(--border-subtle)] lg:max-h-none lg:w-[min(100%,300px)] lg:border-b-0 lg:border-r xl:w-[22rem]">
           <div className="border-b border-[var(--border-subtle)] p-3">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+              Browse
+            </p>
             <input
               type="search"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search titles, tags, bodies…"
-              className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/30"
+              placeholder="Search…"
+              className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/30"
             />
-            <div className="mt-2 flex max-h-24 flex-wrap gap-1 overflow-y-auto">
+            <div className="mt-2 flex max-h-20 flex-wrap gap-1 overflow-y-auto">
               {CATS.map((c) => (
                 <button
                   key={c}
@@ -168,16 +171,18 @@ export function DatabaseWiki() {
                     <button
                       type="button"
                       onClick={() => onPickArticle(a.id)}
-                      className={`w-full rounded-xl px-3 py-2.5 text-left text-sm transition-colors ${
+                      className={`w-full rounded-lg px-3 py-2 text-left text-sm transition-colors ${
                         openId === a.id || selected?.id === a.id
                           ? 'bg-[var(--accent-primary)]/15 text-[var(--text-primary)] ring-1 ring-[var(--accent-primary)]/30'
                           : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
                       }`}
                     >
                       <span className="block font-medium leading-snug">{a.title}</span>
-                      <span className="mt-0.5 block text-[10px] text-[var(--text-muted)]">{a.category}</span>
-                      <span className="mt-1 line-clamp-2 block text-[11px] leading-relaxed text-[var(--text-muted)]">
-                        {a.summary}
+                      <span className="mt-0.5 flex items-center gap-2 text-[10px] text-[var(--text-muted)]">
+                        <span>{a.category}</span>
+                        <span className="line-clamp-1 min-w-0 flex-1 text-[var(--text-muted)]/80">
+                          {a.summary}
+                        </span>
                       </span>
                     </button>
                   </li>
@@ -207,6 +212,9 @@ export function DatabaseWiki() {
                 exit={{ opacity: 0 }}
               >
                 <div className="mx-auto max-w-3xl">
+                  <p className="mb-4 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                    Reading
+                  </p>
                   <div className="mb-6 flex flex-wrap gap-2">
                     {selected.tags.map((t) => (
                       <span

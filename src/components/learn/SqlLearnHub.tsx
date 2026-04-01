@@ -77,12 +77,16 @@ export function SqlLearnHub({ worlds }: Props) {
               Pick your mission
             </span>
           </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--text-secondary)] md:text-base">
-            {worlds.length} worlds and {totalLevels} levels — split by goal so you are not scrolling
-            forever. Each tab explains what you get before you dive in.
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--text-secondary)]">
+            <span className="font-medium text-[var(--text-primary)]">{worlds.length} worlds</span>,{' '}
+            {totalLevels} levels.{' '}
+            <span className="text-[var(--text-muted)]">Choose a track below, then open a world.</span>
           </p>
         </header>
 
+        <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+          1 · Pick a track
+        </p>
         <nav
           className="mb-8 flex snap-x snap-mandatory gap-2 overflow-x-auto pb-2 md:flex-wrap md:overflow-visible"
           aria-label="SQL learning tracks"
@@ -156,9 +160,9 @@ export function SqlLearnHub({ worlds }: Props) {
 
         <motion.h2
           layout
-          className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-[var(--text-muted)]"
+          className="mb-4 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]"
         >
-          Worlds in this track
+          2 · Worlds in this track
         </motion.h2>
 
         <WorldGrid
