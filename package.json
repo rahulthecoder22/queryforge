@@ -13,6 +13,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx}\" \"electron/**/*.ts\"",
     "generate:interview-bank": "node scripts/generate-interview-bank.mjs",
     "generate:wiki-concepts": "node scripts/generate-wiki-concepts.mjs",
+    "generate:dsa": "node scripts/generate-dsa-worlds.mjs",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "typecheck": "tsc -b && tsc -p electron/tsconfig.json --noEmit",

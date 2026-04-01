@@ -361,6 +361,9 @@ export function Dashboard() {
             <Link to="/interview-guide" className="text-[var(--accent-primary)] hover:underline">
               Interview guide
             </Link>
+            <Link to="/learn/dsa" className="text-[var(--accent-primary)] hover:underline">
+              DSA & algorithms
+            </Link>
             <Link to="/settings" className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
               Settings
             </Link>

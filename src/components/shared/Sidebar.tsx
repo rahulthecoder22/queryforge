@@ -9,6 +9,7 @@ const items: { to: string; end?: boolean; label: string; icon: string }[] = [
   { to: '/documents', label: 'Documents', icon: '{}' },
   { to: '/learn', label: 'Learn SQL', icon: '◎' },
   { to: '/interview-guide', label: 'Interview guide', icon: '💼' },
+  { to: '/learn/dsa', label: 'DSA & algorithms', icon: '🧮' },
   { to: '/learn/mongo', label: 'Learn Mongo', icon: '🍃' },
   { to: '/learn/wiki', label: 'Wiki', icon: '📚' },
   { to: '/masterclass', label: 'Masterclass', icon: '◇' },
